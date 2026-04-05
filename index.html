@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KaiSenn 的 2025 年度总结</title>
+<style>
+  /* 基础重置与苹果字体 */
+  * { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; 
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 30%, #dcfce7 80%, #bbf7d0 100%);
+    color: #1d1d1f;
+  }
+
+  /* 核心 4x4 矩阵网格 */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 18px; /* 适当增加间距让错落感更透气 */
+    width: 95vw;
+    max-width: 1200px;
+    height: 90vh;
+    max-height: 820px; 
+  }
+
+  /* 通用卡片属性 */
+  .card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 28px; /* 稍微加大圆角，更贴近 iOS 风格 */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(255, 255, 255, 1);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08);
+  }
+
+  /* 基础排版 */
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 8px; }
+  h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.2px; z-index: 2; position: relative; }
+  p { font-size: 13.5px; line-height: 1.5; color: #515154; z-index: 2; position: relative; }
+  
+  .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(0, 113, 227, 0.1);
+    color: #0071e3; 
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    width: fit-content;
+  }
+
+  /* 全图背景卡片的通用遮罩（保证文字清晰） */
+  .img-bg-card {
+    background-size: cover;
+    background-position: center;
+    border: none;
+    justify-content: flex-end; /* 文字沉底 */
+  }
+  .img-bg-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 20%, rgba(0,0,0,0.6) 100%);
+    z-index: 1;
+  }
+  .img-bg-card h2, .img-bg-card p, .img-bg-card h3 { color: #ffffff; }
+
+  /* ================= 矩阵布局分配 ================= */
+
+  /* 1. Title (宽幅 2x1) - 左上 */
+  .card-title { grid-column: 1 / 3; grid-row: 1 / 2; justify-content: center; background: #ffffff; }
+  
+  /* 2. Porter (超大画幅 2x2) - 右上视觉重心 */
+  .card-porter { 
+    grid-column: 3 / 5; 
+    grid-row: 1 / 3; 
+    background-image: url(./porter.jpg);
+  }
+
+  /* 3. Taste (全图宽幅 2x1) - 左侧中间 */
+  .card-taste { 
+    grid-column: 1 / 3; 
+    grid-row: 2 / 3; 
+    background-image: url(./感受自然.png);
+  }
+
+  /* 4. Internet (修长画幅 1x2) - 左下 */
+/* 修改原有的 card-internet 网格属性并调整 Padding */
+.card-internet { 
+  grid-column: 1 / 2; 
+  grid-row: 3 / 5; 
+  padding: 16px; 
+  display: flex;
+  flex-direction: column;
+}
+
+/* 专辑封面：完美正方形，位于修长卡片的顶部 */
+.card-internet .album-cover {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* 专辑文字排版：自动推到底部，呈现音乐播放器质感 */
+.card-internet .album-info {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto; /* 把文字自动推到竖向卡片的最底部 */
+  padding-bottom: 4px;
+}
+
+.card-internet .album-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0071e3; 
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+/* 适应竖版卡片的文字字号 */
+.card-internet h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-internet p {
+  font-size: 13px;
+  color: #86868b;
+  margin-bottom: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+  
+  /* 5. MyGO (精巧方块 1x1) - 下排 */
+  .card-mygo { grid-column: 2 / 3; grid-row: 3 / 4; background-image: url('./yorushika1.png'); }
+  
+  /* 6. Pop (精巧方块 1x1) - 下排 */
+  .card-pop { grid-column: 2 / 3; grid-row: 4 / 5; background-image: url('./kpop.png'); }
+
+  /* 7. Summary (宽幅 2x1) - 右侧下排 */
+  .card-summary { 
+    background-image: url('./me.png');
+    background-size: cover;
+    background-position: center;
+    border: none;
+    justify-content: flex-end; /* 文字沉底 */
+    grid-column: 3 / 5; 
+    grid-row: 3 / 4; 
+    justify-content: center;
+  }
+
+  /* 8. Vocaloid (精巧方块 1x1) - 右下角 */
+  .card-vocaloid { grid-column: 3 / 4; grid-row: 4 / 5; background-image: url('./4.jpg');}
+
+  /* 9. Chinese (全图方块 1x1) - 右下角 */
+/* 资料卡容器布局重构 */
+.card-chinese { 
+  grid-column: 4 / 5; 
+  grid-row: 4 / 5; 
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+}
+
+/* 资料卡容器布局重构 -> 保持整体对齐，调整 Padding */
+.card-chinese { 
+  grid-column: 4 / 5; 
+  grid-row: 4 / 5; 
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px; /* 适当减小 Padding 让内容不拥挤 */
+  align-items: flex-start; /* 整体居左对齐 */
+  background-image: url('./bigsur.png');
+}
+
+.card-chinese::before {
+  display: none !important; /* 强制隐藏遮罩层 */
+}
+
+/* 上方资料头部 (头像+文字) */
+.profile-header {
+  display: flex;
+  align-items: center; /* 水平居中对齐头像和文字 */
+  gap: 12px; /* 头像和文字之间的间距 */
+  width: 100%;
+}
+
+/* 资料文字块 */
+.profile-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* 占据剩余空间 */
+}
+
+.profile-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius:50%;
+  border: 2px solid #ffffff;
+  background-image: url('./profile.jpg');
+  background-size: cover;
+  background-position: center;
+  margin: 0; /* 移除之前的 margin */
+  flex-shrink: 0; /* 防止头像被压缩 */
+}
+
+.profile-text h2 { 
+  color: #ffffff; 
+  text-align: left; /* 靠左 */
+  font-size: 16px; 
+  margin-bottom: 5px; /* 标题与 tag 的间距 */
+}
+
+/* 调整标签样式 */
+.profile-text .tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 13px;
+  margin: 0; /* 移除 margin-bottom */
+  padding: 5px 10px;
+}
+
+/* 下方正文细节 -> 靠左对齐 */
+.profile-bio { 
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #FFFFFF;
+    z-index: 2;
+    position: relative;
+}
+
+/* 1. 按钮基础形态：变成一个支持宽度渐变的容器 */
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  background-color: #FFFFFF;
+  border-radius: 16px; /* 32px的一半，保证展开后是圆角胶囊状 */
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* 核心：让内部元素永远靠右对齐 */
+  padding-right: 7px; /* 视觉居中：(32px宽 - 18px图标) / 2 = 7px */
+  flex-shrink: 0;
+  margin-left: auto; /* 核心：结合伸缩宽度，实现向左展开 */
+  overflow: hidden; /* 隐藏未展开时的文字 */
+  transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.3s, box-shadow 0.3s;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  text-decoration: none; /* 核心修改：去掉链接下划线 */
+  padding-right: 7px;
+}
+
+/* 2. 隐藏文字状态 */
+.btn-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1D1D1F;
+  white-space: nowrap; /* 文字不换行 */
+  opacity: 0;
+  max-width: 0; /* 压缩文字宽度 */
+  margin-right: 0;
+  transition: max-width 0.3s ease, opacity 0.2s ease, margin 0.3s ease;
+}
+
+/* 3. 箭头保持固定大小，防止被挤压 */
+.btn-icon svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0; 
+}
+
+/* 4. Hover 触发展开状态 */
+.btn-icon:hover {
+  width: 90px; /* 宽度向左拉长，变成胶囊 */
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  /* 移除了 scale，因为胶囊在单边拉伸时再缩放会产生抖动感 */
+}
+
+/* 5. Hover 时文字浮现 */
+.btn-icon:hover .btn-text {
+  opacity: 1;
+  max-width: 60px; /* 给文字分配宽度 */
+  margin-right: 4px; /* 文字和右侧箭头保持一点间距 */
+}
+
+/* 确保 header 容器有足够的宽度和对齐 */
+.profile-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="bento-grid">
+
+  <div class="card card-title">
+    <span class="tag" style="margin-left: 20px;">Your Persona 2025</span>
+    <h1>「赛博精神病」与「温柔救赎者」的</h1>
+    <h1 style="margin-left: 20px;">终极共生</h1>
+    <p style="margin-top: 4px; margin-left: 20px;">一边在互联网里发疯，一边在星空下找家。</p>
+  </div>
+
+  <div class="card card-porter img-bg-card">
+    <span class="tag" style="position: absolute; top: 24px; right: 24px; z-index: 2; background: rgba(255,255,255,0.25); color: #fff;">Pro 级信仰</span>
+    <h2 style="font-size: 24px;">Porter Robinson 重度信徒</h2>
+    <p style="font-size: 15px; opacity: 0.9;">你的绝对精神锚点。内心深处极度渴望从痛苦里爬出来，相信未来会变好，抬头看天就能被治愈，用电子音乐构建一个属于自己的乌托邦。</p>
+  </div>
+
+  <div class="card card-taste img-bg-card">
+    <h2>你属于「电子浪漫主义重症患者」</h2>
+    <p>Vocaloid / 日系电音 / 二次元病娇 / 美式流行 / 独立电子 / 游戏动漫 OST / 中文小众治愈 <br>你听的不是歌，是在虚拟世界中进行高精度的真实情绪演算。</p>
+  </div>
+
+  <div class="card card-internet">
+    <img src="./Nurture.png" alt="Album Cover" class="album-cover">
+    <div class="album-info">
+      <span class="album-label">你的年度专辑</span>
+      <h2>Nurture</h2>
+      <p>Porter Robinson</p>
+    </div>
+  </div>
+
+  <div class="card card-mygo img-bg-card">
+    <h2>对文字与叙事的极致追求</h2>
+    <p>无论是 ヨルシカ 充满文学性的隐喻，还是 MyGO 那种掏心掏肺的自白，你拒绝矫揉造作，只求用最自然、精准的表达直击灵魂，完美翻译内心的微妙情绪。</p>
+  </div>
+
+  <div class="card card-pop img-bg-card">
+    <h2>情绪双重奏</h2>
+    <p>Kpop 与 欧美流行 是你拥抱世界的频道，Porter Robinson 是你留给深夜的自我独白。他们都是你自由切换的情绪背景音。</p>
+  </div>
+
+  <div class="card card-summary">
+    <h2>你到底是个什么样的人？</h2>
+    <p>
+      你能感知到一首歌里最细微的情绪转折，也能在光怪陆离的网络世界和真实平淡的现实生活之间找到自己的锚点。你可能会因为想得太多而感到痛苦，但你始终没有放弃去感受活着的美好（Trying to Feel Alive）。<br>你极有可能是 ENFJ，你有着深刻的感受力和共情能力，这种特质让你在人际交往中表现出温暖和关怀。你渴望亲密无间的关系，但防卫意识很强，不轻易信任他人。这种矛盾让你在关系中既渴望连接又保持距离，容易陷入情感上的试探和考验。
+    </p>
+  </div>
+
+  <div class="card card-vocaloid img-bg-card">
+    <h2>现实逃避型理想主义者</h2>
+    <p>你是一个极度温柔、强大，又带着一点孤注一掷的浪漫主义者。在喧嚣的现实之外，你亲手搭建了一个纯粹的精神避难所。</p>
+  </div>
+
+  <div class="card card-chinese img-bg-card">
+  <div class="profile-header">
+    <div class="profile-avatar"></div>
+    <div class="profile-text">
+      <h2>KaiSenn</h2>
+      <span class="tag">平面设计师</span>
+    </div>
+  </div>
+  
+  <p class="profile-bio">普通人，做自己喜欢的事情。喜欢的话就坚持吧。</p>
+  
+<a href="https://qm.qq.com/q/GqQzS3z6MK" target="_blank" class="btn-icon">
+  <span class="btn-text">联系我</span>
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" fill="#1D1D1F"/>
+  </svg>
+</a>
+  </div>
+
+</div>
+
+</body>
+</html>
