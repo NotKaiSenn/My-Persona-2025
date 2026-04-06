@@ -1,0 +1,184 @@
+/* ================= 基础重置 ================= */
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; 
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 30%, #dcfce7 80%, #bbf7d0 100%);
+  color: #1d1d1f;
+}
+
+/* ================= 网格布局 ================= */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 18px; 
+  width: 95vw;
+  max-width: 1200px;
+  height: 90vh;
+  max-height: 820px; 
+}
+
+/* ================= 进场动画 ================= */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    translate: 0 30px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 28px; 
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 1);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  opacity: 0; 
+  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+  transition: scale 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
+}
+
+.card:hover {
+  scale: 1.02; 
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+}
+
+/* 动画交错延迟 */
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+.card:nth-child(5) { animation-delay: 0.5s; }
+.card:nth-child(6) { animation-delay: 0.6s; }
+.card:nth-child(7) { animation-delay: 0.7s; }
+.card:nth-child(8) { animation-delay: 0.8s; }
+.card:nth-child(9) { animation-delay: 0.9s; }
+
+/* ================= 基础排版 ================= */
+h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 8px; }
+h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.2px; z-index: 2; position: relative; }
+p { font-size: 13.5px; line-height: 1.5; color: #515154; z-index: 2; position: relative; }
+
+.tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(0, 113, 227, 0.1);
+  color: #0071e3; 
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  width: fit-content;
+}
+
+.img-bg-card {
+  background-size: cover;
+  background-position: center;
+  border: none;
+  justify-content: flex-end; 
+}
+.img-bg-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 20%, rgba(0,0,0,0.6) 100%);
+  z-index: 1;
+}
+.img-bg-card h2, .img-bg-card p { color: #ffffff; }
+
+/* ================= 矩阵布局分配 ================= */
+.card-title { grid-column: 1 / 3; grid-row: 1 / 2; justify-content: center; background: #ffffff; }
+.card-porter { grid-column: 3 / 5; grid-row: 1 / 3; background-image: url(./image/porter.webp); }
+.card-taste { grid-column: 1 / 3; grid-row: 2 / 3; background-image: url(./image/感受自然.webp); }
+
+/* 音乐播放器卡片 */
+.card-internet { grid-column: 1 / 2; grid-row: 3 / 5; padding: 16px; display: flex; flex-direction: column; }
+.card-internet .album-cover {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+.card-internet .album-info { display: flex; flex-direction: column; margin-top: auto; padding-bottom: 4px; }
+.card-internet .album-label { font-size: 12px; font-weight: 700; color: #0071e3; letter-spacing: 0.5px; margin-bottom: 4px; }
+.card-internet h2 { color: #1d1d1f; } /* 确保播放器文字不被全局白字覆盖 */
+
+.card-mygo { grid-column: 2 / 3; grid-row: 3 / 4; background-image: url('./image/yorushika1.webp'); }
+.card-pop { grid-column: 2 / 3; grid-row: 4 / 5; background-image: url('./image/kpop.webp'); }
+
+.card-summary { 
+  grid-column: 3 / 5; 
+  grid-row: 3 / 4; 
+  justify-content: center;
+  background-image: url('./image/me.webp');
+  background-size: cover;
+  background-position: center;
+  border: none;
+}
+.card-summary h2 { color: #1d1d1f !important; }
+.card-summary p { color: #515154 !important; }
+
+.card-vocaloid { grid-column: 3 / 4; grid-row: 4 / 5; background-image: url('./image/4.webp'); }
+
+/* 资料卡部分 */
+.card-chinese { 
+  grid-column: 4 / 5; 
+  grid-row: 4 / 5; 
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px; 
+  background-image: url('./image/bigsur.webp');
+}
+.card-chinese::before { display: none !important; }
+
+.profile-header { display: flex; align-items: center; gap: 12px; width: 100%; }
+.profile-avatar {
+  width: 54px; height: 54px; border-radius: 50%; border: 2px solid #ffffff;
+  background-image: url('./image/profile.webp'); background-size: cover; background-position: center; flex-shrink: 0; 
+}
+.profile-text h2 { color: #ffffff; text-align: left; font-size: 16px; margin-bottom: 5px; }
+.profile-text .tag { background: rgba(255, 255, 255, 0.2); color: #ffffff; font-size: 13px; padding: 5px 10px; margin: 0; }
+.profile-bio { font-size: 13.5px; line-height: 1.5; color: #FFFFFF; z-index: 2; position: relative; }
+
+/* 联系我按钮 */
+.btn-icon {
+  width: 32px; height: 32px; background-color: #FFFFFF; border-radius: 16px; 
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: flex-end; 
+  padding-right: 7px; flex-shrink: 0; margin-left: auto; overflow: hidden; 
+  text-decoration: none; z-index: 3;
+  transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s;
+}
+.btn-text {
+  font-size: 13px; font-weight: 600; color: #1D1D1F; white-space: nowrap; 
+  opacity: 0; max-width: 0; transition: max-width 0.3s ease, opacity 0.2s ease;
+}
+.btn-icon svg { width: 18px; height: 18px; flex-shrink: 0; }
+.btn-icon:hover { width: 90px; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+.btn-icon:hover .btn-text { opacity: 1; max-width: 60px; margin-right: 4px; }
