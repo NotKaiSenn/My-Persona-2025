@@ -110,8 +110,8 @@ p { font-size: 13.5px; line-height: 1.5; color: #515154; z-index: 2; position: r
 
 /* ================= 矩阵布局分配 ================= */
 .card-title { grid-column: 1 / 3; grid-row: 1 / 2; justify-content: center; background: #ffffff; }
-.card-porter { grid-column: 3 / 5; grid-row: 1 / 3; background-image: url(./image/porter.webp); }
-.card-taste { grid-column: 1 / 3; grid-row: 2 / 3; background-image: url(./image/感受自然.webp); }
+.card-porter { grid-column: 3 / 5; grid-row: 1 / 3; background-image: url(../images/porter.webp); }
+.card-taste { grid-column: 1 / 3; grid-row: 2 / 3; background-image: url(../images/nature.webp); }
 
 /* 音乐播放器卡片 */
 .card-internet { grid-column: 1 / 2; grid-row: 3 / 5; padding: 16px; display: flex; flex-direction: column; }
@@ -127,14 +127,14 @@ p { font-size: 13.5px; line-height: 1.5; color: #515154; z-index: 2; position: r
 .card-internet .album-label { font-size: 12px; font-weight: 700; color: #0071e3; letter-spacing: 0.5px; margin-bottom: 4px; }
 .card-internet h2 { color: #1d1d1f; } /* 确保播放器文字不被全局白字覆盖 */
 
-.card-mygo { grid-column: 2 / 3; grid-row: 3 / 4; background-image: url('./image/yorushika1.webp'); }
-.card-pop { grid-column: 2 / 3; grid-row: 4 / 5; background-image: url('./image/kpop.webp'); }
+.card-mygo { grid-column: 2 / 3; grid-row: 3 / 4; background-image: url('../images/yorushika1.webp'); }
+.card-pop { grid-column: 2 / 3; grid-row: 4 / 5; background-image: url('../images/kpop.webp'); }
 
 .card-summary { 
   grid-column: 3 / 5; 
   grid-row: 3 / 4; 
   justify-content: center;
-  background-image: url('./image/me.webp');
+  background-image: url('../images/me.webp');
   background-size: cover;
   background-position: center;
   border: none;
@@ -142,7 +142,7 @@ p { font-size: 13.5px; line-height: 1.5; color: #515154; z-index: 2; position: r
 .card-summary h2 { color: #1d1d1f !important; }
 .card-summary p { color: #515154 !important; }
 
-.card-vocaloid { grid-column: 3 / 4; grid-row: 4 / 5; background-image: url('./image/4.webp'); }
+.card-vocaloid { grid-column: 3 / 4; grid-row: 4 / 5; background-image: url('../images/4.webp'); }
 
 /* 资料卡部分 */
 .card-chinese { 
@@ -154,14 +154,14 @@ p { font-size: 13.5px; line-height: 1.5; color: #515154; z-index: 2; position: r
   justify-content: space-between;
   align-items: flex-start;
   padding: 20px; 
-  background-image: url('./image/bigsur.webp');
+  background-image: url('../images/bigsur.webp');
 }
 .card-chinese::before { display: none !important; }
 
 .profile-header { display: flex; align-items: center; gap: 12px; width: 100%; }
 .profile-avatar {
   width: 54px; height: 54px; border-radius: 50%; border: 2px solid #ffffff;
-  background-image: url('./image/profile.webp'); background-size: cover; background-position: center; flex-shrink: 0; 
+  background-image: url('../images/profile.webp'); background-size: cover; background-position: center; flex-shrink: 0; 
 }
 .profile-text h2 { color: #ffffff; text-align: left; font-size: 16px; margin-bottom: 5px; }
 .profile-text .tag { background: rgba(255, 255, 255, 0.2); color: #ffffff; font-size: 13px; padding: 5px 10px; margin: 0; }
