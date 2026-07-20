@@ -25,10 +25,6 @@
   --growth-line-bottom-space: 260px;
 }
 
-* {
-  box-sizing: border-box;
-}
-
 html {
   scroll-behavior: smooth;
 }
