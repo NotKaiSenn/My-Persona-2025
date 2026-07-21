@@ -1,9 +1,8 @@
 /* ================= 基础重置 ================= */
-* { 
-  box-sizing: border-box; 
-  margin: 0; 
-  padding: 0; 
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; 
+* {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -110,7 +109,25 @@ p { font-size: 13.5px; line-height: 1.5; color: #515154; z-index: 2; position: r
 
 /* ================= 矩阵布局分配 ================= */
 .card-title { grid-column: 1 / 3; grid-row: 1 / 2; justify-content: center; background: #ffffff; }
+.card-title .title-tag,
+.card-title .title-line2,
+.card-title .title-lede {
+  margin-left: 20px;
+}
+.card-title .title-lede { margin-top: 4px; }
+
 .card-porter { grid-column: 3 / 5; grid-row: 1 / 3; background-image: url(../images/porter.webp); }
+.card-porter .porter-badge {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+.card-porter h2 { font-size: 24px; }
+.card-porter p { font-size: 15px; opacity: 0.9; }
+
 .card-taste { grid-column: 1 / 3; grid-row: 2 / 3; background-image: url(../images/nature.webp); }
 
 /* 音乐播放器卡片 */
@@ -139,8 +156,6 @@ p { font-size: 13.5px; line-height: 1.5; color: #515154; z-index: 2; position: r
   background-position: center;
   border: none;
 }
-.card-summary h2 { color: #1d1d1f !important; }
-.card-summary p { color: #515154 !important; }
 
 .card-vocaloid { grid-column: 3 / 4; grid-row: 4 / 5; background-image: url('../images/4.webp'); }
 
