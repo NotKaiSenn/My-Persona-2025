@@ -6,13 +6,14 @@
   <title>微型沙盒实验</title>
   <link rel="stylesheet" href="../assets/css/base.css">
   <link rel="stylesheet" href="../assets/css/sandbox-lab.css">
+  <script src="../assets/js/sandbox-lab.js" defer></script>
 </head>
 <body>
   <main class="sandbox">
-    <div class="farm-plot" id="plot" data-stage="0">🌱</div>
-    <p id="hint">点击耕地，给作物浇水催熟。</p>
+    <button class="farm-plot" id="plot" type="button" aria-label="给作物浇水" aria-describedby="hint">
+      <span id="crop" aria-hidden="true">🌱</span>
+    </button>
+    <p id="hint" role="status">点击耕地，给作物浇水催熟。</p>
   </main>
-
-  <script src="../assets/js/sandbox-lab.js"></script>
 </body>
 </html>

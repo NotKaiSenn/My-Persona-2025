@@ -1,0 +1,232 @@
+/* Hero composition, shared heading styles, and growth line. */
+.field-page {
+  position: relative;
+  overflow: visible;
+  min-height: max(140vh, calc(var(--growth-line-height) + var(--growth-line-top) + var(--growth-line-bottom-space)));
+}
+
+.field-hero {
+  position: sticky;
+  top: 0;
+  min-height: 100svh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 24%, rgba(255,255,255,0.72), transparent 34%),
+    radial-gradient(circle at 76% 68%, rgba(226,236,218,0.38), transparent 30%),
+    linear-gradient(180deg, #edf5ef, #f7f8f2 58%, #eef5ef);
+}
+
+.nurture-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.nurture-sheet::before {
+  content: "";
+  position: absolute;
+  left: 9vw;
+  bottom: 9svh;
+  width: 32vw;
+  height: 22svh;
+  background:
+    radial-gradient(ellipse at 50% 65%, rgba(255,255,255,0.42), rgba(232,242,232,0.58) 58%, transparent 72%);
+  border-radius: 48% 52% 43% 57%;
+  filter: blur(0.2px);
+  opacity: calc((1 - var(--hero-leave)) * 0.34);
+  transform: translate3d(calc(var(--hero-leave) * -30px), calc(var(--hero-leave) * 36px), 0);
+  mask-image: radial-gradient(ellipse at 50% 50%, #000 0 40%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 0 40%, transparent 72%);
+  pointer-events: none;
+}
+
+.nurture-sheet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(237,245,239,0.82), rgba(247,248,242,0.4) 44%, rgba(238,245,239,0.82)),
+    radial-gradient(circle at 50% 45%, transparent 0 18%, rgba(255,255,255,0.26) 36%, transparent 58%);
+  opacity: calc(1 - var(--hero-leave));
+  pointer-events: none;
+}
+
+.hero-copy {
+  --intro-local: clamp(0, calc((var(--intro) - 0.1) * 1.35), 1);
+  position: fixed;
+  left: max(72px, calc((100vw - 1180px) / 2));
+  top: 36svh;
+  z-index: 8;
+  width: min(430px, 34vw);
+  transform:
+    translate3d(calc(var(--hero-leave) * -54px), calc(var(--hero-leave) * -150px), 0)
+    translate3d(calc((1 - var(--intro-local)) * -10px), calc((1 - var(--intro-local)) * 22px), 0)
+    rotate(calc(var(--hero-leave) * -1.4deg))
+    scale(calc(1 - var(--hero-leave) * 0.08));
+  transform-origin: left center;
+  opacity: calc((1 - var(--hero-leave)) * var(--intro-local));
+}
+
+.eyebrow {
+  margin: 0 0 18px;
+  color: rgba(32, 32, 28, 0.56);
+  font-size: 14px;
+  font-weight: 820;
+  letter-spacing: 0;
+}
+
+#something-changed {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+.hero-copy h1 {
+  max-width: 440px;
+  margin: 0 0 20px;
+  color: rgba(24, 24, 22, 0.94);
+  font-family: var(--font-display);
+  font-size: clamp(48px, 5.8vw, 92px);
+  font-weight: 500;
+  line-height: 0.96;
+  letter-spacing: 0;
+}
+
+.hero-text {
+  max-width: 390px;
+  margin-bottom: 0;
+  color: rgba(35,36,33,0.66);
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.hero-index {
+  --intro-local: clamp(0, calc((var(--intro) - 0.28) * 1.35), 1);
+  position: fixed;
+  right: max(72px, calc((100vw - 1180px) / 2));
+  bottom: 18svh;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: min(300px, 28vw);
+  opacity: calc((1 - var(--hero-leave)) * var(--intro-local));
+  transform:
+    translate3d(calc(var(--hero-leave) * 80px), calc(var(--hero-leave) * 42px), 0)
+    translate3d(calc((1 - var(--intro-local)) * 16px), calc((1 - var(--intro-local)) * 18px), 0);
+  pointer-events: auto;
+}
+
+.hero-index a {
+  position: relative;
+  padding: 0 0 10px 28px;
+  border-bottom: 1px solid rgba(31,31,28,0.18);
+  color: rgba(31,31,28,0.72);
+  font-family: var(--font-serif);
+  font-size: clamp(18px, 2.1vw, 28px);
+  letter-spacing: 0.18em;
+  text-transform: lowercase;
+  transition: transform 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+.hero-index a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.8em;
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+}
+
+.hero-index a:hover {
+  color: rgba(22,22,20,0.96);
+  border-color: rgba(31,31,28,0.34);
+  transform: translateX(7px);
+}
+
+.sheet-title {
+  --intro-local: clamp(0, calc((var(--intro) - 0.18) * 1.35), 1);
+  position: fixed;
+  left: calc(50% - 278px);
+  top: 15.5svh;
+  z-index: 8;
+  color: rgba(29,29,26,0.84);
+  font-family: var(--font-serif);
+  font-size: clamp(26px, 2.8vw, 42px);
+  line-height: 0.9;
+  letter-spacing: 0.42em;
+  opacity: calc((1 - var(--hero-leave)) * var(--intro-local));
+  transform:
+    translateX(-100%)
+    translate3d(calc(var(--hero-leave) * -58px), calc(var(--hero-leave) * -32px), 0)
+    translate3d(calc((1 - var(--intro-local)) * -10px), calc((1 - var(--intro-local)) * 18px), 0)
+    rotate(calc(var(--hero-leave) * -2deg));
+}
+
+.sheet-title span,
+.sheet-title strong {
+  display: block;
+}
+
+.sheet-title strong {
+  margin-top: 2px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  transform: translateX(20px);
+}
+
+.sheet-role {
+  --intro-local: clamp(0, calc((var(--intro) - 0.3) * 1.35), 1);
+  position: fixed;
+  left: calc(50% + 118px);
+  top: 16.8svh;
+  z-index: 8;
+  color: rgba(29,29,26,0.64);
+  font-family: var(--font-serif);
+  font-size: clamp(18px, 2vw, 28px);
+  letter-spacing: 0.5em;
+  opacity: calc((1 - var(--hero-leave)) * var(--intro-local));
+  transform:
+    translate3d(calc(var(--hero-leave) * 68px), calc(var(--hero-leave) * -46px), 0)
+    translate3d(calc((1 - var(--intro-local)) * 10px), calc((1 - var(--intro-local)) * 14px), 0);
+}
+
+.growth-line {
+  position: absolute;
+  left: 50%;
+  top: var(--growth-line-top);
+  z-index: 7;
+  width: var(--growth-line-width);
+  height: var(--growth-line-height);
+  color: #000;
+  overflow: visible;
+  transform: translateX(var(--growth-line-x)) scale(var(--growth-line-scale));
+  transform-origin: top center;
+  pointer-events: none;
+}
+
+.growth-stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--growth-stroke-width);
+  stroke-miterlimit: 10;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.78;
+  stroke-dasharray: 1.025;
+  stroke-dashoffset: 1.025;
+  animation: strokeGrow var(--growth-duration) cubic-bezier(.47, 0, .16, 1) forwards;
+}
+
+@keyframes strokeGrow {
+  to {
+    stroke-dashoffset: 0;
+  }
+}

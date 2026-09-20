@@ -5,26 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KaiSenn | Living Archive</title>
   <link rel="stylesheet" href="assets/css/base.css">
-  <link rel="stylesheet" href="assets/css/living-archive.css">
+  <link rel="stylesheet" href="assets/css/living-archive/foundation.css">
+  <link rel="stylesheet" href="assets/css/living-archive/navigation.css">
+  <link rel="stylesheet" href="assets/css/living-archive/hero.css">
+  <link rel="stylesheet" href="assets/css/living-archive/archive.css">
+  <link rel="stylesheet" href="assets/css/living-archive/responsive.css">
+  <script src="assets/js/living-archive.js" defer></script>
+  <script src="assets/js/archive-navigation.js" defer></script>
+  <script src="assets/js/site-navigation.js" defer></script>
 </head>
 <body>
-  <header class="glass-nav">
-    <a class="brand" href="./" aria-label="KaiSenn Living Archive">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-copy">
-        <strong>KaiSenn</strong>
-        <em>trying to feel alive</em>
-      </span>
-    </a>
-    <nav class="nav-links" aria-label="主要导航">
-      <a href="#notes">文字</a>
-      <a href="#music">音乐</a>
-      <a href="pages/persona-2025.html">Persona</a>
-      <a href="pages/sandbox-lab.html">Lab</a>
+  <header class="nav-shell">
+    <nav class="glass-nav nav-links" aria-label="主要导航">
+      <a href="#home">主页</a>
+      <a href="#notes">笔记</a>
+      <a href="#works">作品</a>
+      <a href="#about">关于</a>
     </nav>
   </header>
 
-  <main class="field-page">
+  <main class="field-page" id="home">
     <svg class="growth-line" viewBox="0 0 155.81 1810.69" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
       <path
         class="growth-stroke"
@@ -98,7 +98,7 @@
           </div>
         </a>
 
-        <a class="archive-card lab-card" href="pages/sandbox-lab.html">
+        <a class="archive-card lab-card" id="works" href="pages/sandbox-lab.html">
           <div class="lab-field" aria-hidden="true">
             <span></span><span></span><span></span><span></span>
           </div>
@@ -108,7 +108,7 @@
           </div>
         </a>
 
-        <section class="archive-card about-card">
+        <section class="archive-card about-card" id="about">
           <svg class="paperclip" viewBox="0 0 38 104" aria-hidden="true">
             <path d="M27 82V18C27 9.2 21.4 4 14.8 4S3 9.7 3 18.1v67.4C3 94 8.4 100 15.5 100S28 94.1 28 85.7V27.9c0-5.2-3.2-8.5-7.2-8.5s-7.2 3.3-7.2 8.5v57.3" />
           </svg>
@@ -137,7 +137,5 @@
       </div>
     </section>
   </main>
-
-  <script src="assets/js/living-archive.js"></script>
 </body>
 </html>

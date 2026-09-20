@@ -1,0 +1,213 @@
+/* Viewport adaptations and reduced-motion overrides. Keep after component styles. */
+@media (max-width: 920px) {
+  .hero-copy {
+    left: 24px;
+    top: auto;
+    bottom: 120px;
+    width: min(320px, calc(100% - 48px));
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(42px, 14vw, 68px);
+  }
+
+  .nurture-sheet::before {
+    left: -16vw;
+    bottom: 10svh;
+    width: 82vw;
+    height: 28svh;
+    opacity: 0.2;
+  }
+
+  .sheet-title {
+    left: 24px;
+    top: 118px;
+    transform: none;
+    font-size: 28px;
+  }
+
+  .sheet-role {
+    display: none;
+  }
+
+  :root {
+    --growth-line-width: min(230px, 70vw);
+  }
+
+  .hero-index {
+    left: auto;
+    right: 22px;
+    bottom: 92px;
+    width: 128px;
+    gap: 11px;
+  }
+
+  .hero-index a {
+    padding: 0 0 7px 18px;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+  }
+
+  .archive-board {
+    width: min(100% - 24px, 680px);
+    min-height: auto;
+    margin-top: -4svh;
+  }
+
+  .archive-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    gap: 14px;
+    min-height: auto;
+  }
+
+  .notes-card,
+  .music-card,
+  .persona-card,
+  .lab-card,
+  .about-card {
+    --card-x: 0px;
+    --card-y: 0px;
+    --card-w: 100%;
+    --card-h: auto;
+    --enter-x: 0px;
+    --enter-y: 64px;
+    --tilt: 0deg;
+    position: relative;
+    width: 100%;
+    min-height: auto;
+    transform: translateY(calc((1 - var(--archive-reveal)) * var(--enter-y)));
+  }
+
+  .persona-card {
+    min-height: 360px;
+  }
+
+  .lab-card {
+    min-height: 344px;
+    padding: 210px 28px 28px;
+  }
+
+  .lab-card > div:not(.lab-field) {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: min(340px, 100%);
+  }
+
+  .lab-card > .lab-field {
+    left: 28px;
+    top: 24px;
+    width: 220px;
+    height: 132px;
+  }
+
+  .music-card {
+    justify-self: center;
+    width: min(300px, 100%);
+    min-height: 500px;
+  }
+
+  .paperclip {
+    left: auto;
+    right: 72px;
+    top: -36px;
+    width: 32px;
+    height: 88px;
+    stroke-width: 3.2;
+  }
+}
+
+@media (max-width: 540px) {
+  .hero-index {
+    display: none;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(40px, 15vw, 60px);
+  }
+
+  .hero-text {
+    font-size: 15px;
+  }
+
+  .archive-board {
+    width: calc(100% - 18px);
+  }
+
+  .notes-card,
+  .lab-card,
+  .about-card {
+    padding: 18px;
+  }
+
+  .lab-card {
+    padding: 210px 18px 22px;
+  }
+
+  .note-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .note-row em {
+    grid-column: auto;
+  }
+}
+
+/* Content stays in the document flow without JavaScript or optional motion. */
+:root:not(.has-motion) .field-hero {
+  position: relative;
+}
+
+:root:not(.has-motion) .nurture-sheet,
+:root:not(.has-motion) .hero-copy,
+:root:not(.has-motion) .hero-index,
+:root:not(.has-motion) .sheet-title,
+:root:not(.has-motion) .sheet-role {
+  position: absolute;
+}
+
+:root:not(.has-motion) .archive-board {
+  margin-top: 0;
+}
+
+:root:not(.has-motion) .growth-stroke {
+  animation: none;
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+
+  :root {
+    --intro: 1;
+    --hero-leave: 0;
+    --archive-reveal: 1;
+  }
+
+  .archive-card {
+    --hover-lift: 0px;
+  }
+
+  .hero-index a:hover {
+    transform: none;
+  }
+}
+
+/* Fragment destinations must stay still while the browser positions them. */
+.has-archive-target .archive-board {
+  --archive-reveal: 1;
+}
+
+.is-positioning-archive .archive-card {
+  transition: none;
+}

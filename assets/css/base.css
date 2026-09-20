@@ -1,4 +1,16 @@
-/* 三个页面共用的最小重置,页面各自的 CSS 里不再重复声明 */
+/* Shared typography and the minimal reset used by all content pages. */
+:root {
+  --font-sans-latin: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-display: Georgia, "Times New Roman", "Songti SC", serif;
+}
+
 * {
   box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
 }
