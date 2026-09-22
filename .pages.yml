@@ -85,9 +85,10 @@ content:
       - name: avatarUrl
         label: 头像外链
         type: string
+        required: false
         description: 可选，填写 HTTPS 图片直链；优先于上传头像。
         pattern:
-          regex: '^https://[^\s]+$'
+          regex: '^(?:https://[^\s]+)?$'
           message: 请填写完整的 HTTPS 图片地址，或留空。
       - name: favicon
         label: 网站图标
@@ -98,9 +99,10 @@ content:
       - name: contactUrl
         label: 联系地址
         type: string
+        required: false
         description: 可填写社交主页或联系页面；留空时隐藏联系入口。
         pattern:
-          regex: '^https://[^\s]+$'
+          regex: '^(?:https://[^\s]+)?$'
           message: 请填写完整的 HTTPS 地址，或留空。
   - name: works
     label: 作品
@@ -185,9 +187,10 @@ content:
           - name: externalSrc
             label: 照片外链
             type: string
+            required: false
             description: 可选，填写 HTTPS 图片直链；优先于上传照片。
             pattern:
-              regex: '^https://[^\s]+$'
+              regex: '^(?:https://[^\s]+)?$'
               message: 请填写完整的 HTTPS 图片地址，或留空。
           - name: alt
             label: 画面描述
@@ -245,9 +248,10 @@ content:
           - name: avatarUrl
             label: 头像外链
             type: string
+            required: false
             description: 可选，填写 HTTPS 图片直链；优先于上传头像。
             pattern:
-              regex: '^https://[^\s]+$'
+              regex: '^(?:https://[^\s]+)?$'
               message: 请填写完整的 HTTPS 图片地址，或留空。
 
 settings:

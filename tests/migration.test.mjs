@@ -64,6 +64,33 @@ test('CMS stores the same fields used by the site with safe writing defaults', (
   assert.ok(!workFields.some(field => ['id', 'image', 'imageUrl'].includes(field.name) && field.required), 'New work submissions must not require identifiers or a separate cover');
 });
 
+test('optional CMS external links accept empty strings while required website links remain required', () => {
+  const cms = parse(readFileSync(join(root, '.pages.yml'), 'utf8'));
+  for (const [name, keys] of [
+    ['profile', ['avatarUrl', 'contactUrl']],
+    ['photos', ['externalSrc']],
+    ['friends', ['avatarUrl']],
+  ]) {
+    const entry = cms.content.find(entry => entry.name === name);
+    const fields = name === 'profile' ? entry.fields : entry.fields.find(field => field.name === 'items').fields;
+    for (const key of keys) {
+      const field = fields.find(field => field.name === key);
+      const label = `${name}.${key}`;
+      assert.notEqual(field.required, true, `${label} must be optional`);
+      const pattern = new RegExp(field.pattern.regex);
+      assert.ok(pattern.test(''), `${label} must allow clearing an existing external link`);
+      assert.ok(pattern.test('https://cdn.example.com/image.webp?v=2'), `${label} must accept HTTPS links`);
+      for (const invalid of ['http://example.com/image.png', 'https://', '/uploads/image.png', 'https://example.com/a b.png', 'not a URL']) {
+        assert.ok(!pattern.test(invalid), `${label} must reject ${invalid}`);
+      }
+    }
+  }
+  const friendFields = cms.content.find(entry => entry.name === 'friends').fields.find(field => field.name === 'items').fields;
+  const website = friendFields.find(field => field.name === 'url');
+  assert.equal(website.required, true);
+  assert.ok(!new RegExp(website.pattern.regex).test(''), 'A friend must still have a website destination');
+});
+
 test('production CSS retains standard backdrop filters after vendor-prefix minification', () => {
   const css = readdirSync(join(root, 'dist/_astro')).filter(file => file.endsWith('.css')).map(file => read(`_astro/${file}`)).join('');
   for (const selector of ['.folder-stage::backdrop', '.folder-flap']) {
