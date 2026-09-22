@@ -3,7 +3,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const projectRoot = path.resolve(__dirname, "..");
+const projectRoot = path.resolve(__dirname, "../dist");
+assert.ok(fs.existsSync(path.join(projectRoot, "index.html")), "Build the site before testing: npm run build");
 const siteOrigin = "https://local.test";
 
 function sourceFiles(directory) {
@@ -41,7 +42,8 @@ function readSource(filename) {
 
 function checkReference(filename, reference, checkFragment) {
   const value = reference.trim();
-  if (!value || value === "#" || /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(value)) return;
+  assert.notEqual(value, "#", `Placeholder link in ${filename}`);
+  if (!value || /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(value)) return;
   if (!checkFragment && value.startsWith("#")) return;
 
   // Resolve CSS assets against their own stylesheet, just as the browser does.
@@ -69,7 +71,8 @@ for (const filename of sourceFiles(projectRoot)) {
         checkReference(filename, reference, true);
       }
     }
-    for (const reference of cssUrls(source)) {
+    const cssSource = isHtml ? source.replaceAll('&quot;', '"').replaceAll('&#39;', "'").replaceAll('&amp;', '&') : source;
+    for (const reference of cssUrls(cssSource)) {
       checkReference(filename, reference, false);
     }
   });

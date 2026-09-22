@@ -59,17 +59,21 @@ function createBrowser({ reducedMotion = false, ids = ["plot", "crop", "hint"] }
     setTimeout(callback) { timers.set(++id, callback); return id; },
     clearTimeout(timerId) { timers.delete(timerId); },
   });
-  const document = {
+  const document = Object.assign(new EventTarget(), {
     documentElement: root,
     querySelectorAll: () => [card],
     getElementById: (name) => elements[name] ?? null,
     createElement: () => new Element(),
-  };
+  });
 
   return {
-    root, card, elements, frames, timers, window,
+    root, card, elements, frames, timers, window, document,
+    replacePage(ids = ["plot", "crop", "hint"]) {
+      for (const name of Object.keys(elements)) delete elements[name];
+      for (const name of ids) elements[name] = new Element();
+    },
     run(script) {
-      runInNewContext(readFileSync(join(__dirname, "../../assets/js", script), "utf8"), {
+      runInNewContext(readFileSync(join(__dirname, "../../src/scripts", script), "utf8"), {
         window, document, performance: { now: () => now },
       }, { filename: script });
     },

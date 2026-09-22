@@ -1,0 +1,270 @@
+media:
+  - name: uploads
+    label: 图片
+    input: public/uploads
+    output: /uploads
+    extensions: [jpg, jpeg, png, webp]
+    rename: random
+
+content:
+  - name: posts
+    label: 笔记
+    type: collection
+    path: src/content/posts
+    exclude: [".gitkeep"]
+    format: yaml-frontmatter
+    subfolders: false
+    filename:
+      template: "{year}-{month}-{day}-{hour}{minute}{second}.md"
+      field: create
+    operations:
+      create: true
+      rename: false
+      delete: true
+    view:
+      fields: [title, pubDate, draft]
+      primary: title
+      sort: [pubDate, title]
+      default:
+        sort: pubDate
+        order: desc
+    fields:
+      - name: title
+        label: 标题
+        type: string
+        required: true
+        description: 文件名决定笔记地址，保存后不能改名。请以 .md 结尾，可使用文字、数字、短横线或下划线。
+      - name: description
+        label: 摘要
+        type: text
+        default: ""
+        description: 留空时使用正文开头作为摘要。
+      - name: pubDate
+        label: 发布日期
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+          time: false
+      - name: draft
+        label: 草稿
+        type: boolean
+        default: true
+        description: 关闭后在下次构建成功时发布。日期不支持定时发布；公开仓库中仍能查看草稿。
+      - name: body
+        label: 正文
+        type: rich-text
+        options:
+          format: markdown
+          switcher: true
+          media: uploads
+  - name: profile
+    label: 个人资料
+    type: file
+    path: src/data/site.json
+    format: json
+    operations:
+      create: false
+      rename: false
+      delete: false
+    fields:
+      - name: name
+        label: 名字
+        type: string
+        required: true
+      - name: bio
+        label: 简介
+        type: text
+        required: true
+      - name: avatar
+        label: 上传头像
+        type: image
+        options:
+          media: uploads
+        description: 留空时显示默认占位。
+      - name: avatarUrl
+        label: 头像外链
+        type: string
+        description: 可选，填写 HTTPS 图片直链；优先于上传头像。
+        pattern:
+          regex: '^https://[^\s]+$'
+          message: 请填写完整的 HTTPS 图片地址，或留空。
+      - name: favicon
+        label: 网站图标
+        type: image
+        options:
+          media: uploads
+        description: 建议使用方形 PNG；留空时显示默认图标。
+      - name: contactUrl
+        label: 联系地址
+        type: string
+        description: 可填写社交主页或联系页面；留空时隐藏联系入口。
+        pattern:
+          regex: '^https://[^\s]+$'
+          message: 请填写完整的 HTTPS 地址，或留空。
+  - name: works
+    label: 作品
+    type: file
+    path: src/data/works.json
+    format: json
+    operations:
+      create: false
+      rename: false
+      delete: false
+    fields:
+      - name: items
+        label: 作品
+        type: object
+        description: 按列表顺序展示；可把最新作品拖到最前面。
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{title}"
+        fields:
+          - name: id
+            label: 标识
+            type: string
+            required: true
+            description: 每件作品使用不同标识，保存后保持不变。
+            pattern:
+              regex: '^[A-Za-z0-9][A-Za-z0-9_-]*$'
+              message: 请使用字母、数字、短横线或下划线。
+          - name: title
+            label: 名称
+            type: string
+            required: true
+          - name: url
+            label: 访问地址
+            type: string
+            required: true
+            description: 支持站内路径（如 /lab/）或完整的 HTTPS 地址。
+          - name: description
+            label: 简介
+            type: text
+          - name: image
+            label: 上传封面
+            type: image
+            options:
+              media: uploads
+            description: 留空时显示色块占位。
+          - name: imageUrl
+            label: 封面外链
+            type: string
+            description: 可选，填写 HTTPS 图片直链；优先于上传封面。
+            pattern:
+              regex: '^https://[^\s]+$'
+              message: 请填写完整的 HTTPS 图片地址，或留空。
+  - name: photos
+    label: 照片
+    type: file
+    path: src/data/photos.json
+    format: json
+    operations:
+      create: false
+      rename: false
+      delete: false
+    fields:
+      - name: items
+        label: 相册
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{title}"
+        fields:
+          - name: id
+            label: 固定网址
+            type: string
+            required: true
+            description: 每张照片使用不同名称，保存后保持不变。修改标题不会改变网址。
+            pattern:
+              regex: '^[A-Za-z0-9][A-Za-z0-9_-]*$'
+              message: 请使用字母、数字、短横线或下划线。
+          - name: title
+            label: 标题
+            type: string
+            required: true
+          - name: date
+            label: 日期
+            type: date
+            required: true
+            options:
+              format: yyyy-MM-dd
+              time: false
+          - name: src
+            label: 上传照片
+            type: image
+            options:
+              media: uploads
+            description: 上传前请压缩图片；填写外链时可留空。
+          - name: externalSrc
+            label: 照片外链
+            type: string
+            description: 可选，填写 HTTPS 图片直链；优先于上传照片。
+            pattern:
+              regex: '^https://[^\s]+$'
+              message: 请填写完整的 HTTPS 图片地址，或留空。
+          - name: alt
+            label: 画面描述
+            type: string
+            required: true
+            description: 简短描述画面，供读屏或图片无法加载时使用。
+          - name: description
+            label: 说明
+            type: text
+          - name: width
+            label: 图片宽度
+            type: number
+            description: 上传照片会自动读取；外链照片可填写原图宽度（像素）。
+          - name: height
+            label: 图片高度
+            type: number
+            description: 上传照片会自动读取；外链照片可填写原图高度（像素）。
+  - name: friends
+    label: 朋友
+    type: file
+    path: src/data/friends.json
+    format: json
+    operations:
+      create: false
+      rename: false
+      delete: false
+    fields:
+      - name: items
+        label: 朋友
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{name}"
+        fields:
+          - name: name
+            label: 名称
+            type: string
+            required: true
+          - name: url
+            label: 网站地址
+            type: string
+            required: true
+            pattern:
+              regex: '^https://[^\s]+$'
+              message: 请填写完整的 HTTPS 网站地址。
+          - name: description
+            label: 简介
+            type: text
+          - name: avatar
+            label: 上传头像
+            type: image
+            options:
+              media: uploads
+          - name: avatarUrl
+            label: 头像外链
+            type: string
+            description: 可选，填写 HTTPS 图片直链；优先于上传头像。
+            pattern:
+              regex: '^https://[^\s]+$'
+              message: 请填写完整的 HTTPS 图片地址，或留空。
+
+settings:
+  content:
+    merge: true

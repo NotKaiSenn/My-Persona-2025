@@ -1,0 +1,56 @@
+---
+import { Icon } from 'astro-icon/components';
+interface Props { id: string; title: string; subtitle: string; href: string; emptyMessage?: string; tiled?: boolean; }
+const { id, title, subtitle, href, emptyMessage = '暂无笔记', tiled = false } = Astro.props;
+---
+<dialog id={id} class="folder-stage" aria-labelledby={`${id}-title`}>
+  <header class="stage-bar">
+    <div><h2 id={`${id}-title`}>{title}</h2><a href={href}>{subtitle}<Icon is:inline aria-hidden="true" focusable="false" name="ph:arrow-up-right" /></a></div>
+    <div class="stage-actions">
+      {tiled && <div class="stage-views" role="group" aria-label="照片排列方式">
+        <button type="button" data-gallery-view="stack" aria-pressed="true"><Icon is:inline aria-hidden="true" focusable="false" name="ph:stack" />叠放</button>
+        <button type="button" data-gallery-view="grid" aria-pressed="false"><Icon is:inline aria-hidden="true" focusable="false" name="ph:squares-four" />平铺</button>
+      </div>}
+      <button class="stage-close" type="button" data-gallery-close aria-label={`关闭${title}文件夹`} autofocus><Icon is:inline aria-hidden="true" focusable="false" name="close" /></button>
+    </div>
+  </header>
+  <div class="stage-viewport"><ul class="stage-cards" aria-label={`${title}卡片`}></ul></div>
+  <p class="stage-empty" hidden>{emptyMessage}</p>
+  <footer class="stage-footer"><div class="stage-controls"><button type="button" data-gallery-prev aria-label="上一张卡片"><Icon is:inline aria-hidden="true" focusable="false" name="ph:arrow-left" /></button><span data-gallery-count role="status" aria-live="polite" aria-atomic="true"></span><button type="button" data-gallery-next aria-label="下一张卡片"><Icon is:inline aria-hidden="true" focusable="false" name="ph:arrow-right" /></button></div></footer>
+</dialog>
+<script>import '../scripts/folder-gallery';</script>
+<style is:global>
+  html:has(.folder-stage[open]) { overflow: hidden; scrollbar-gutter: stable; }
+  .folder-stage { position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: 0; border: none; overflow: hidden; color: var(--ink); background: transparent; }
+  .folder-stage::backdrop { background: #f5f8f3db; -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%); transition: opacity 300ms ease; }
+  .folder-stage.is-closing::backdrop { opacity: 0; }
+  .stage-bar { position: absolute; z-index: 100; inset: 0 0 auto; padding: 24px; display: flex; align-items: start; justify-content: space-between; gap: 20px; }
+  .stage-bar h2 { font-size: 14px; font-weight: 550; }
+  .stage-bar a { display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; font-size: 12px; color: var(--muted); }
+  .stage-actions { display: flex; align-items: center; gap: 22px; }
+  .stage-views { display: flex; align-items: center; gap: 16px; }
+  .stage-views button { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 6px 2px; border: 0; color: #7a8275; background: none; font-size: 13px; line-height: 1; cursor: pointer; }
+  .stage-views button[aria-pressed="true"] { color: var(--ink); }
+  .stage-views button[aria-pressed="true"]::after { content: ''; position: absolute; inset: auto 2px 0; height: 1px; background: currentColor; opacity: .3; }
+  .stage-views button:hover { color: var(--ink); }
+  .stage-views [data-icon] { width: 16px; height: 16px; }
+  .stage-close { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 1px solid #4853400c; border-radius: 50%; color: #7a8275; background: #ffffffb3; cursor: pointer; }
+  .stage-cards { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; }
+  .stage-viewport { position: absolute; inset: 0; overflow: hidden; }
+  .folder-stage.is-grid .stage-viewport { inset: 92px 0 18px; width: min(900px,calc(100% - 48px)); margin-inline: auto; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+  .folder-stage.is-reflowing .stage-viewport { overflow: visible; touch-action: none; }
+  .folder-stage.is-grid .stage-cards { bottom: auto; }
+  .folder-stage.is-grid .folder-item .collection-frame .card-picker { display: block; }
+  .folder-stage.is-grid .card-content { pointer-events: none; }
+  .folder-stage.is-grid .card-picker:focus-visible { outline-width: calc(2px / var(--stage-scale,1)); outline-offset: calc(5px / var(--stage-scale,1)); }
+  .stage-footer { position: absolute; z-index: 100; inset: auto 24px 18px; display: flex; justify-content: center; align-items: center; gap: 30px; }
+  .stage-controls { display: flex; align-items: center; gap: 6px; color: #7a8275; }
+  .stage-controls button { display: grid; place-items: center; width: 32px; height: 32px; border: none; padding: 0; background: none; color: inherit; cursor: pointer; }
+  .stage-controls button[aria-disabled="true"] { opacity: .3; cursor: default; }
+  [data-gallery-count] { min-width: 48px; color: var(--body); font-size: 13px; font-weight: 500; line-height: 1; font-variant-numeric: lining-nums tabular-nums; text-align: center; }
+  .stage-empty { position: absolute; top: 46%; width: 100%; padding: 0 30px; text-align: center; font-size: 14px; color: var(--muted); }
+  .folder-stage.is-closing .stage-bar, .folder-stage.is-closing .stage-footer { opacity: 0; pointer-events: none; }
+  .stage-footer[hidden] { display: none; }
+  @media (max-width: 540px) { .stage-bar { padding: 20px; } .stage-footer { inset-inline: 20px; bottom: 20px; } .stage-actions { gap: 18px; } .stage-views { gap: 14px; } .folder-stage.is-grid .stage-viewport { width: calc(100% - 32px); } }
+  @media (prefers-reduced-motion: reduce) { .folder-stage::backdrop { transition: none; } }
+</style>

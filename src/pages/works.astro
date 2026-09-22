@@ -1,0 +1,13 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import WorkCard from '../components/WorkCard.astro';
+import { works } from '../lib/works';
+---
+<SiteLayout title="作品">
+  <header class="page-heading"><h1>作品</h1></header>
+  {works.length > 0 ? <ul class="works-grid">{works.map(work => <li><WorkCard work={work} /></li>)}</ul> : <div class="empty-state"><p>暂无作品</p></div>}
+</SiteLayout>
+<style>
+  .works-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 30px; align-items: start; }
+  @media (max-width: 540px) { .works-grid { grid-template-columns: minmax(0,1fr); gap: 38px; } }
+</style>

@@ -1,0 +1,32 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { Icon } from 'astro-icon/components';
+---
+<SiteLayout title="树林" breadcrumbs={[{ label: '作品', href: '/works/' }, { label: '树林' }]}>
+  <header class="page-heading"><h1>树林</h1></header>
+  <section class="garden-sheet" aria-label="种植小实验">
+    <div class="garden-stage">
+      <button class="farm-plot" id="plot" type="button" aria-label="给作物浇水" aria-describedby="hint">
+        <span id="crop" aria-hidden="true">🌱</span>
+      </button>
+    </div>
+    <p id="hint" role="status">点击耕地，给作物浇水催熟。</p>
+    <noscript><p class="no-script">请启用浏览器脚本使用此功能。</p></noscript>
+  </section>
+  <a class="back-link garden-back" href="/works/"><Icon is:inline aria-hidden="true" focusable="false" name="ph:arrow-left" />返回作品</a>
+</SiteLayout>
+<script>import '../scripts/sandbox-lab.js';</script>
+<style>
+  .garden-sheet { position: relative; padding: 29px 28px 40px; text-align: center; border: 1px solid #e5e8df; border-radius: 16px; background: linear-gradient(165deg,#ffffff,#f4f6ef); box-shadow: 0 2px 4px #29322204, 0 16px 34px #29322207; }
+  .garden-stage { display: grid; place-items: center; padding: 63px 0 54px; }
+  .farm-plot { position: relative; display: grid; place-items: center; width: 128px; height: 120px; padding: 0; border: 5px solid #d8cab9; border-bottom-width: 9px; border-radius: 17px; color: inherit; background: #8d745c; box-shadow: inset 0 3px 9px #3d281b29, 0 3px 0 #b6a38c, 0 12px 22px #574b3421; font-size: 3.3rem; line-height: 1; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; transition: transform 150ms ease, background-color 150ms ease; }
+  .farm-plot:hover { background: #967e65; }
+  .farm-plot:active { transform: translateY(2px); }
+  #crop { display: block; transform: translateY(-6px); }
+  #hint { color: var(--body); font-size: .875rem; min-height: 3.5em; }
+  .garden-back { margin-top: 30px; }
+  .no-script { font-size: .8125rem; color: var(--muted); margin-top: 14px; }
+  .garden-sheet :global(.item-drop) { position: absolute; font-size: 2rem; pointer-events: none; animation: harvest 750ms ease-out forwards; }
+  @keyframes harvest { to { opacity: 0; transform: translate(42px,-60px) rotate(18deg) scale(.5); } }
+  @media (prefers-reduced-motion: reduce) { .farm-plot { transition: none; } .farm-plot:active { transform: none; } .garden-sheet :global(.item-drop) { display: none; } }
+</style>

@@ -52,61 +52,54 @@ test("sandbox initialization safely skips incomplete markup", () => {
   assert.doesNotThrow(() => browser.run("sandbox-lab.js"));
 });
 
-test("scroll updates coalesce, clamp to the page range, and stop when settled", () => {
+test("repeated page-load events preserve the current crop and bind only one action", () => {
   const browser = createBrowser();
-  browser.run("living-archive.js");
-  browser.window.scrollY = 10000;
-  for (let i = 0; i < 100; i += 1) browser.emit(browser.window, "scroll");
-  assert.ok(browser.frames.size <= 2, "only intro and scroll frames may be scheduled");
-  browser.finishFrames();
-  assert.equal(browser.root.style.get("--p"), "1.000");
-  assert.equal(browser.root.style.get("--intro"), "1.000");
-  browser.window.scrollY = -20;
-  browser.emit(browser.window, "scroll");
-  browser.finishFrames();
-  assert.equal(browser.root.style.get("--p"), "0.000");
+  browser.run("sandbox-lab.js");
+  click(browser);
+  browser.emit(browser.document, "astro:page-load");
+  browser.emit(browser.document, "astro:page-load");
+  assert.equal(browser.elements.crop.textContent, "🌿");
+  click(browser);
+  assert.equal(browser.elements.crop.textContent, "🌾");
+  assert.equal(browser.timers.size, 0);
 });
 
-test("resizing recomputes progress and initial scroll position is restored", () => {
+test("leaving the lab cleans pending harvests and returning binds the new page", () => {
   const browser = createBrowser();
-  browser.window.scrollY = 370;
-  browser.run("living-archive.js");
-  assert.equal(browser.root.style.get("--p"), "0.500");
-  browser.window.innerHeight = 500;
-  browser.emit(browser.window, "resize");
-  browser.finishFrames();
-  assert.equal(browser.root.style.get("--p"), "1.000");
+  browser.run("sandbox-lab.js");
+  click(browser, 7);
+  const oldPlot = browser.elements.plot;
+  const oldCrop = browser.elements.crop;
+  assert.equal(oldPlot.children.length, 2);
+  assert.equal(browser.timers.size, 2);
+
+  browser.emit(browser.document, "astro:before-swap");
+  assert.equal(oldPlot.children.length, 0);
+  assert.equal(browser.timers.size, 0);
+  browser.emit(oldPlot, "click");
+  assert.equal(oldCrop.textContent, "🌿");
+
+  browser.replacePage([]);
+  browser.emit(browser.document, "astro:page-load");
+  browser.emit(browser.document, "astro:before-swap");
+  browser.replacePage();
+  browser.emit(browser.document, "astro:page-load");
+  assert.equal(browser.elements.crop.textContent, "🌱");
+  click(browser, 3);
+  assert.equal(browser.elements.crop.textContent, "🌱");
+  assert.equal(browser.elements.plot.children.length, 1);
+  browser.finishTimers();
+  assert.equal(browser.elements.plot.children.length, 0);
 });
 
-test("motion preference changes cancel frames and reset card offsets immediately", () => {
-  const browser = createBrowser();
-  browser.run("living-archive.js");
-  browser.emit(browser.card, "pointermove", { pointerType: "mouse", clientX: 180, clientY: 75 });
-  assert.ok(browser.card.style.has("--float-x"));
+test("a script loaded without lab markup initializes on a later page-load", () => {
+  const browser = createBrowser({ ids: [] });
+  browser.run("sandbox-lab.js");
+  browser.replacePage();
+  browser.emit(browser.document, "astro:page-load");
   browser.setReducedMotion(true);
-  assert.equal(browser.frames.size, 0);
-  assert.equal(browser.root.classList.has("has-motion"), false);
-  assert.equal(browser.card.style.has("--float-x"), false);
-  assert.equal(browser.root.style.get("--intro"), "1");
-  browser.emit(browser.window, "scroll");
-  browser.emit(browser.card, "pointermove", { clientX: 180, clientY: 75 });
-  assert.equal(browser.frames.size, 0);
-  assert.equal(browser.card.style.has("--float-x"), false);
-  browser.setReducedMotion(false);
-  assert.equal(browser.root.classList.has("has-motion"), true);
-  assert.equal(browser.frames.size, 0, "changing preference should not replay the intro");
-  browser.emit(browser.card, "pointermove", { pointerType: "touch", clientX: 180, clientY: 75 });
-  assert.equal(browser.card.style.has("--float-x"), false);
-  browser.emit(browser.card, "pointermove", { pointerType: "mouse", clientX: 180, clientY: 75 });
-  browser.emit(browser.card, "pointercancel");
-  assert.equal(browser.card.style.has("--float-x"), false);
-});
-
-test("reduced-motion startup schedules no animation work", () => {
-  const browser = createBrowser({ reducedMotion: true });
-  browser.run("living-archive.js");
-  assert.equal(browser.frames.size, 0);
-  assert.equal(browser.root.classList.has("has-motion"), false);
-  browser.emit(browser.window, "scroll");
-  assert.equal(browser.frames.size, 0);
+  click(browser, 3);
+  assert.equal(browser.elements.hint.textContent, "收割成功，新种子已播下。");
+  assert.equal(browser.elements.plot.children.length, 0);
+  assert.equal(browser.timers.size, 0);
 });

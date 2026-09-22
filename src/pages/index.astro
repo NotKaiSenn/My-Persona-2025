@@ -1,0 +1,44 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Folder from '../components/Folder.astro';
+import profile from '../data/site.json';
+import Avatar from '../components/Avatar.astro';
+import FolderGallery from '../components/FolderGallery.astro';
+import CollectionCard from '../components/CollectionCard.astro';
+import { works } from '../lib/works';
+import { friends, photoUrl } from '../lib/collections';
+import { photos } from '../lib/photos';
+import { getPosts } from '../lib/posts';
+import { postUrl, postPreview } from '../lib/post-data';
+import { folderPreviews } from '../lib/folder-previews';
+const posts = await getPosts();
+const previews = folderPreviews(posts);
+const workPreviews = folderPreviews(works);
+const photoPreviews = folderPreviews(photos);
+const friendPreviews = folderPreviews(friends);
+---
+<SiteLayout>
+  <section class="intro" id="about" aria-labelledby="intro-title">
+    <Avatar />
+    <h1 id="intro-title">{profile.name}</h1>
+    <p>{profile.bio}</p>
+  </section>
+  <section class="folder-grid" id="collections" aria-label="内容文件夹">
+    <Folder href="/posts/" title="笔记" subtitle={`${posts.length} 篇`} variant="posts" empty={!posts.length}>
+      {previews.map((post, index) => <CollectionCard kind="note" title={post.data.title} href={postUrl(post.id)} index={index} total={previews.length} paragraphs={postPreview(post)} date={post.data.pubDate} />)}
+    </Folder>
+    <Folder href="/works/" title="作品" subtitle={`${works.length} 项`} variant="works" empty={!works.length}>
+      {workPreviews.map((work, index) => <CollectionCard kind="photo" title={work.title} href={work.url} index={index} total={workPreviews.length} imageSrc={work.image} description={work.description} showTitle />)}
+    </Folder>
+    <Folder href="/photos/" title="照片" subtitle={`${photos.length} 张`} variant="photos" empty={!photos.length}>
+      {photoPreviews.map((photo,index) => <CollectionCard kind="photo" title={photo.title} href={photoUrl(photo)} index={index} total={photoPreviews.length} imageSrc={photo.src} imageAlt={photo.alt} imageWidth={photo.width} imageHeight={photo.height} />)}
+    </Folder>
+    <Folder href="/friends/" title="朋友" subtitle={`${friends.length} 位`} variant="friends" empty={!friends.length}>
+      {friendPreviews.map((friend,index) => <CollectionCard kind="friend" title={friend.name} href={friend.url} index={index} total={friendPreviews.length} imageSrc={friend.avatar} description={friend.description} />)}
+    </Folder>
+  </section>
+  <FolderGallery id="posts-gallery" title="笔记" subtitle={`全部 ${posts.length} 篇`} href="/posts/" />
+  <FolderGallery id="works-gallery" title="作品" subtitle={`全部 ${works.length} 项`} href="/works/" emptyMessage="暂无作品" />
+  <FolderGallery id="photos-gallery" title="照片" subtitle={`全部 ${photos.length} 张`} href="/photos/" emptyMessage="暂无照片" tiled />
+  <FolderGallery id="friends-gallery" title="朋友" subtitle={`全部 ${friends.length} 位`} href="/friends/" emptyMessage="暂无链接" />
+</SiteLayout>
