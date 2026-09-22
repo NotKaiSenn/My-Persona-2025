@@ -1,6 +1,6 @@
 ---
 import { Icon } from 'astro-icon/components';
-import profile from '../data/site.json';
+import profile from '../lib/profile';
 import { imageSource } from '../lib/collections';
 const value = profile.avatarUrl?.trim() || profile.avatar?.trim();
 const source = value ? imageSource(value, 'Profile avatar') : undefined;

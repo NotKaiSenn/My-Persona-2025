@@ -81,10 +81,11 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
   writePost('hidden-draft', { title: 'PRIVATE_DRAFT_SENTINEL', pubDate: '2026-10-01', draft: draftDefault });
   writePost('default-draft', { title: 'DEFAULT_DRAFT_SENTINEL', pubDate: '2026-10-01' }, '');
   const read = (path) => readFileSync(join(fixture, 'dist', path), 'utf8');
-  const build = () => execFileSync(process.execPath, [join(root, 'node_modules/astro/bin/astro.mjs'), 'build', '--root', fixture], {
+  const runAstro = (command) => execFileSync(process.execPath, [join(root, 'node_modules/astro/bin/astro.mjs'), command, '--root', fixture], {
     cwd: fixture, encoding: 'utf8', timeout: 120_000, env: { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
+  const build = () => runAstro('build');
   build();
 
   await t.test('homepage previews 6 latest articles; year-grouped archive has 12 then 3', () => {
@@ -200,6 +201,40 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
     assert.doesNotMatch(imagelessWork, /<img\b/);
     for (const html of [photo, external, photoList, friends, works]) assertNoContentScripts(html);
     assert.match(read('sitemap-0.xml'), /https:\/\/kaisenn.net\/photos\/photo-window\//);
+  });
+
+  await t.test('omitting the optional avatar URL preserves the uploaded avatar', () => {
+    const profile = { ...fixtureProfile };
+    delete profile.avatarUrl;
+    try {
+      writeFileSync(profilePath, JSON.stringify(profile));
+      runAstro('check');
+      build();
+      const home = read('index.html');
+      assert.match(home, /data-avatar-placeholder/);
+      assert.match(home, /<img[^>]*src="\/uploads\/avatar.png"[^>]*data-avatar-image/);
+      assert.match(home, /<link rel="icon" href="\/uploads\/avatar.png"/);
+      assert.match(home, /href="https:\/\/contact.example.com\/"/);
+    } finally {
+      writeFileSync(profilePath, JSON.stringify(fixtureProfile));
+    }
+  });
+
+  await t.test('omitting all optional profile fields preserves the default appearance', () => {
+    const profile = { ...fixtureProfile };
+    for (const field of ['avatar', 'avatarUrl', 'favicon', 'contactUrl']) delete profile[field];
+    try {
+      writeFileSync(profilePath, JSON.stringify(profile));
+      runAstro('check');
+      build();
+      const home = read('index.html');
+      assert.match(home, /data-avatar-placeholder/);
+      assert.doesNotMatch(home, /<img\b[^>]*data-avatar-image/);
+      assert.match(home, /<link rel="icon" href="\/favicon.svg"/);
+      assert.doesNotMatch(home, /contact\.example\.com/);
+    } finally {
+      writeFileSync(profilePath, JSON.stringify(fixtureProfile));
+    }
   });
 
   await t.test('editing a title keeps its URL; moving a published post to draft removes output', () => {
