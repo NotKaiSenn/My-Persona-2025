@@ -1,0 +1,28 @@
+{
+  "name": "kaisenn-blog",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "node --test tests/*.test.cjs tests/*.test.mjs",
+    "test:integration": "node --test tests/integration/*.test.mjs"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "@iconify-json/ph": "^1.2.2",
+    "astro": "^7.3.3",
+    "astro-icon": "^1.2.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^5.9.3",
+    "yaml": "^2.8.0"
+  }
+}

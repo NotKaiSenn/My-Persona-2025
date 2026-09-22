@@ -1,0 +1,23 @@
+.prose { color: var(--body); font-size: 1.0625rem; line-height: 1.95; overflow-wrap: anywhere; }
+.prose > * + * { margin-top: 1.45em; }
+.prose h2, .prose h3, .prose h4 { color: var(--ink); font-weight: 550; line-height: 1.55; scroll-margin-top: 30px; }
+.prose h2 { margin-top: 2.4em; font-size: 1.4rem; }
+.prose h3 { margin-top: 1.9em; font-size: 1.15rem; }
+.prose h2 + *, .prose h3 + * { margin-top: .75em; }
+.prose a { color: var(--green); text-decoration: underline; text-decoration-color: #a5b29b; }
+.prose strong { color: var(--ink); font-weight: 600; }
+.prose ul, .prose ol { padding-left: 1.5em; }
+.prose li + li { margin-top: .45em; }
+.prose li > ul, .prose li > ol { margin: .4em 0; }
+.prose blockquote { margin-left: 0; margin-right: 0; padding: 3px 0 3px 21px; border-left: 2px solid #b4c2a8; color: #697460; }
+.prose blockquote p + p { margin-top: 1em; }
+.prose img { margin: 2em auto; border-radius: 8px; }
+.prose pre { max-width: 100%; overflow-x: auto; padding: 20px 22px; border: 1px solid var(--line); border-radius: 10px; font-size: .8125rem; line-height: 1.8; }
+.prose code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+.prose :not(pre) > code { padding: .15em .32em; border-radius: 4px; background: #edf0e8; font-size: .88em; }
+.prose table { display: block; width: max-content; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: .9375rem; }
+.prose th, .prose td { padding: 10px 15px; border: 1px solid var(--line); min-width: 100px; text-align: left; }
+.prose th { background: #eef1ea; color: var(--ink); font-weight: 550; }
+.prose hr { border: 0; border-top: 1px solid var(--line); margin: 2.6em 0; }
+.prose iframe, .prose video { max-width: 100%; }
+@media (min-width: 768px) { .prose { font-size: 1.125rem; } }

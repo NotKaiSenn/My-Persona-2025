@@ -1,0 +1,26 @@
+---
+import { Icon } from 'astro-icon/components';
+interface Props { title: string; icon?: string; image?: string; description?: string; }
+const { title, icon, image, description } = Astro.props;
+---
+<div class="work-visual">
+  <div class:list={['work-image', { 'without-image': !image }]}>
+    {image && <img class="work-cover" src={image} alt="" width="800" height="600" loading="lazy" decoding="async" />}
+    {icon ? <img class="work-icon" src={icon} alt="" width="96" height="96" loading="lazy" decoding="async" /> : !image && <Icon is:inline aria-hidden="true" focusable="false" name="ph:stack" class="work-placeholder" />}
+    <div class="work-overlay"><div><h2>{title}</h2>{description && <p>{description}</p>}</div></div>
+  </div>
+</div>
+<style>
+  .work-visual { width: 100%; height: 100%; border-radius: var(--radius,3.5cqw); overflow: hidden; }
+  .work-image { position: relative; width: 100%; height: 100%; aspect-ratio: 4 / 3; overflow: hidden; border-radius: inherit; background: #e4ebdf; }
+  .work-cover { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .work-icon { position: absolute; top: 10%; left: 6%; z-index: 1; display: block; width: 20%; height: auto; aspect-ratio: 1; object-fit: contain; }
+  .work-overlay { position: absolute; inset: 0; display: flex; align-items: flex-end; padding: 6cqw; color: white; background: linear-gradient(transparent 35%,#15201b18 50%,#101c16a6); }
+  h2 { font-size: 6cqw; line-height: 1.45; font-weight: 550; overflow-wrap: anywhere; text-shadow: 0 1px 4px #0002; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  p { margin-top: 2cqw; font-size: 3.8cqw; line-height: 1.65; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .without-image { background: linear-gradient(145deg,#e8ecdf,#cddbc7); }
+  .without-image :global(.work-placeholder) { position: absolute; top: 10%; left: 6%; width: 20%; height: auto; color: #7d9276; }
+  .without-image .work-overlay { color: var(--ink); background: none; }
+  .without-image h2 { text-shadow: none; }
+  .without-image p { color: var(--body); }
+</style>

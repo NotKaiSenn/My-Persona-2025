@@ -1,0 +1,8 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { Icon } from 'astro-icon/components';
+---
+<SiteLayout title="页面不存在" noindex>
+  <header class="page-heading"><span class="eyebrow">404</span><h1>页面不存在</h1></header>
+  <a class="back-link" href="/"><Icon is:inline aria-hidden="true" focusable="false" name="ph:arrow-left" />回到首页</a>
+</SiteLayout>

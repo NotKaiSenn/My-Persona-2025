@@ -1,0 +1,6 @@
+---
+import PostsPage from '../../components/PostsPage.astro';
+import { getPosts } from '../../lib/posts';
+const posts = await getPosts();
+---
+<PostsPage posts={posts} />

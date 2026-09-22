@@ -1,0 +1,62 @@
+---
+import '../styles/global.css';
+import { Icon } from 'astro-icon/components';
+import profile from '../data/site.json';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import PageTransition from '../components/PageTransition.astro';
+import { imageSource } from '../lib/collections';
+
+interface Props {
+  title?: string;
+  description?: string;
+  wide?: boolean;
+  noindex?: boolean;
+  articleDate?: string;
+  breadcrumbs?: Array<{ label: string; href?: string }>;
+}
+const { title, description = profile.bio, wide = false, noindex = false, articleDate, breadcrumbs = title ? [{ label: title }] : [] } = Astro.props;
+const pageTitle = title ? `${title} · ${profile.name}` : profile.name;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const favicon = profile.favicon?.trim() ? imageSource(profile.favicon, 'Site icon') : '/favicon.svg';
+const isPosts = Astro.url.pathname.startsWith('/posts/');
+const isWorks = Astro.url.pathname === '/works/';
+---
+<!doctype html>
+<html lang="zh-CN" style="background-color:#f3f7f1;color-scheme:light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f3f7f1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={favicon} />
+    <link rel="alternate" type="application/rss+xml" title={`${profile.name} 的笔记`} href="/rss.xml" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:type" content={articleDate ? 'article' : 'website'} />
+    {articleDate && <meta property="article:published_time" content={articleDate} />}
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <PageTransition />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+    <div class:list={['site-shell', { 'reading-shell': wide }]}>
+      <header class:list={['site-header', { 'has-detail-path': breadcrumbs.length > 1 }]}>
+        <Breadcrumbs items={breadcrumbs} />
+        <nav class="primary-nav" aria-label="主要导航">
+          <a href="/posts/" aria-current={isPosts ? 'page' : undefined}>笔记</a>
+          <a href="/works/" aria-current={isWorks ? 'page' : undefined}>作品</a>
+          {profile.contactUrl && <a href={profile.contactUrl} target="_blank" rel="noopener noreferrer">联系<Icon is:inline aria-hidden="true" focusable="false" name="ph:arrow-up-right" class="external-mark" /></a>}
+        </nav>
+      </header>
+      <main id="main" tabindex="-1"><slot /></main>
+      <footer class="site-footer">
+        <span>© {new Date().getFullYear()} {profile.name}</span>
+        <a href="/rss.xml">订阅<Icon is:inline aria-hidden="true" focusable="false" name="ph:arrow-up-right" /></a>
+      </footer>
+    </div>
+  </body>
+</html>
