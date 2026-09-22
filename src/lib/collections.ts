@@ -20,10 +20,11 @@ export interface Friend {
 }
 
 export interface Work {
-  id: string;
+  id?: string;
   title: string;
   url: string;
   description?: string;
+  icon?: string;
   image?: string;
 }
 
@@ -123,10 +124,12 @@ export function parseWorks(value: unknown): Work[] {
   return entries(value, 'Works').map((item, index) => {
     const label = `Work ${index + 1}`;
     const work = record(item, label);
-    const id = text(work.id, `${label}.id`);
-    if (!/^[\p{L}\p{N}][\p{L}\p{N}_-]*$/u.test(id)) throw new Error(`${label}.id must contain only letters, numbers, hyphens or underscores.`);
-    if (ids.has(id)) throw new Error(`Duplicate work id: ${id}`);
-    ids.add(id);
+    const id = optionalText(work.id, `${label}.id`);
+    if (id) {
+      if (!/^[\p{L}\p{N}][\p{L}\p{N}_-]*$/u.test(id)) throw new Error(`${label}.id must contain only letters, numbers, hyphens or underscores.`);
+      if (ids.has(id)) throw new Error(`Duplicate work id: ${id}`);
+      ids.add(id);
+    }
     const url = text(work.url, `${label}.url`);
     if (url.startsWith('/')) {
       let decoded: string;
@@ -137,6 +140,7 @@ export function parseWorks(value: unknown): Work[] {
     } else {
       httpsUrl(url, `${label}.url`);
     }
+    const icon = optionalText(work.icon, `${label}.icon`);
     const image = optionalText(work.image, `${label}.image`);
     const imageUrl = optionalText(work.imageUrl, `${label}.imageUrl`);
     return {
@@ -144,6 +148,7 @@ export function parseWorks(value: unknown): Work[] {
       title: text(work.title, `${label}.title`),
       url,
       description: optionalText(work.description, `${label}.description`),
+      icon: icon ? imageSource(icon, `${label}.icon`) : undefined,
       image: imageUrl ? httpsUrl(imageUrl, `${label}.imageUrl`) : image ? imageSource(image, `${label}.image`) : undefined,
     };
   });

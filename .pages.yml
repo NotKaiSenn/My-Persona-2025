@@ -115,20 +115,18 @@ content:
       - name: items
         label: 作品
         type: object
-        description: 按列表顺序展示；可把最新作品拖到最前面。
+        description: 这里只管理展示入口，作品本身可独立制作和部署。按列表顺序展示。
         list:
           collapsible:
             collapsed: true
             summary: "{title}"
         fields:
-          - name: id
-            label: 标识
-            type: string
-            required: true
-            description: 每件作品使用不同标识，保存后保持不变。
-            pattern:
-              regex: '^[A-Za-z0-9][A-Za-z0-9_-]*$'
-              message: 请使用字母、数字、短横线或下划线。
+          - name: icon
+            label: 图标
+            type: image
+            options:
+              media: uploads
+            description: 上传 PNG、WebP 或 JPG，建议使用方形图片；留空时显示默认图标。
           - name: title
             label: 名称
             type: string
@@ -137,23 +135,10 @@ content:
             label: 访问地址
             type: string
             required: true
-            description: 支持站内路径（如 /lab/）或完整的 HTTPS 地址。
+            description: 可链接独立网页、在线项目或其他内容，填写站内路径或完整的 HTTPS 地址。
           - name: description
             label: 简介
             type: text
-          - name: image
-            label: 上传封面
-            type: image
-            options:
-              media: uploads
-            description: 留空时显示色块占位。
-          - name: imageUrl
-            label: 封面外链
-            type: string
-            description: 可选，填写 HTTPS 图片直链；优先于上传封面。
-            pattern:
-              regex: '^https://[^\s]+$'
-              message: 请填写完整的 HTTPS 图片地址，或留空。
   - name: photos
     label: 照片
     type: file

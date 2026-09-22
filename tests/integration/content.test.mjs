@@ -34,6 +34,7 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
   writeTinyPng(join(fixture, 'public/uploads/photo.png'));
   writeTinyPng(join(fixture, 'public/uploads/avatar.png'));
   writeTinyPng(join(fixture, 'public/uploads/work.png'));
+  writeTinyPng(join(fixture, 'public/uploads/work-icon.png'));
   const photosPath = join(fixture, 'src/data/photos.json');
   const fixturePhotos = [
     { id: 'photo-window', title: '测试照片：窗边', date: '2026-09-20', description: '本地照片的测试说明。', src: '/uploads/photo.png', alt: '测试上传的图片' },
@@ -50,8 +51,9 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
   writeFileSync(friendsPath, JSON.stringify({ items: fixtureFriends }));
   const worksPath = join(fixture, 'src/data/works.json');
   const fixtureWorks = Array.from({ length: 8 }, (_, index) => ({
-    id: `work-${index + 1}`, title: `作品 ${index + 1}`, url: `/lab/?example=${index + 1}`, description: `作品说明 ${index + 1}`,
-    ...(index !== 2 ? { image: '/uploads/work.png' } : {}),
+    title: `作品 ${index + 1}`, url: `https://example.com/work-${index + 1}/`, description: `作品说明 ${index + 1}`,
+    ...(index > 0 ? { id: `work-${index + 1}` } : { icon: '/uploads/work-icon.png' }),
+    ...(index !== 0 && index !== 2 ? { image: '/uploads/work.png' } : {}),
     ...(index === 1 ? { imageUrl: 'https://images.example.com/work.webp' } : {}),
   }));
   writeFileSync(worksPath, JSON.stringify({ items: fixtureWorks }));
@@ -112,7 +114,7 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
     const home = read('index.html');
     const expected = {
       posts: { total: 15, unit: '篇', hrefs: ['same-day', '中文文章', 'note-13', 'note-12', 'note-11', 'note-10'].map(id => `/posts/${encodeURIComponent(id)}/`) },
-      works: { total: 8, unit: '项', hrefs: Array.from({ length: 6 }, (_, index) => `/lab/?example=${index + 1}`) },
+      works: { total: 8, unit: '项', hrefs: fixtureWorks.slice(0, 6).map(work => work.url) },
       photos: { total: 8, unit: '张', hrefs: ['photo-window', 'photo-external', 'photo-old-6', 'photo-old-5', 'photo-old-4', 'photo-old-3'].map(id => `/photos/${id}/`) },
       friends: { total: 8, unit: '位', hrefs: fixtureFriends.slice(0, 6).map(friend => friend.url) },
     };
@@ -155,7 +157,7 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
     const home = read('index.html');
     const photo = read('photos/photo-window/index.html');
     const external = read('photos/photo-external/index.html');
-    for (const image of ['photo.png', 'avatar.png', 'work.png']) {
+    for (const image of ['photo.png', 'avatar.png', 'work.png', 'work-icon.png']) {
       assert.ok(existsSync(join(fixture, 'dist/uploads', image)), `${image} is published at its CMS URL`);
     }
     assert.match(photo, /<img[^>]*src="\/uploads\/photo.png"[^>]*alt="测试上传的图片"[^>]*width="1"[^>]*height="1"/);
@@ -180,9 +182,19 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
     assert.match(friends, /href="https:\/\/another.example.com\/"/);
     assert.match(friends, /src="https:\/\/avatars.example.com\/friend.webp"/);
     const works = read('works/index.html');
+    for (const work of fixtureWorks) assert.ok(works.includes(`href="${work.url}"`), `${work.title} links to its configured destination`);
     assert.match(works, /src="\/uploads\/work.png"/);
     assert.match(works, /src="https:\/\/images.example.com\/work.webp"/);
     assert.match(works, /作品说明 1/);
+    for (const html of [home, works]) {
+      const iconWork = html.match(/<a\b[^>]*href="https:\/\/example.com\/work-1\/"[^>]*aria-label="作品 1"[\s\S]*?<\/a>/)?.[0];
+      assert.ok(iconWork, 'An icon, text and link submission renders without a manual identifier');
+      const icon = iconWork.match(/<img\b[^>]*src="\/uploads\/work-icon.png"[^>]*>/)?.[0];
+      assert.ok(icon, 'The uploaded icon appears in both the folder and complete works list');
+      assert.match(icon, /class="work-icon(?:\s[^"]*)?"/);
+      assert.match(iconWork, /作品说明 1/);
+      assert.doesNotMatch(iconWork, /src="\/uploads\/work.png"/);
+    }
     const imagelessWork = works.match(/<a\b[^>]*aria-label="作品 3"[\s\S]*?<\/a>/)?.[0];
     assert.ok(imagelessWork, 'A work can be published before a cover is uploaded');
     assert.doesNotMatch(imagelessWork, /<img\b/);
@@ -251,6 +263,7 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
         assert.doesNotMatch(html, /<img\b/, `${path} must use placeholders when collections and profile images are empty`);
         assert.doesNotMatch(html, /sample-night|a-page-for-small-moments|排版测试|终极共生/, `${path} still contains removed content`);
         assert.doesNotMatch(html, /(?:src|href)="(?:#|\/assets\/images\/[^\"]+)"/, `${path} contains an old image or broken placeholder link`);
+        assert.doesNotMatch(html, /(?:href|data-href)="\/(?:lab(?:[/?#"]|$)|persona\/2025(?:[/?#"]|$)|pages\/(?:persona-2025|sandbox-lab|home-redirect)\.html)/, `${path} contains a fixed link to a retired page`);
       }
     } finally {
       for (const [file, source] of originals) writeFileSync(join(content, file), source);

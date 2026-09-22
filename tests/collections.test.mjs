@@ -52,7 +52,7 @@ test('friend avatars accept uploads and give HTTPS external overrides priority',
 });
 
 test('CMS works keep configured order, accept optional uploaded covers and prioritize external covers', () => {
-  const work = { id: 'first', title: '第一个作品', url: '/lab/', description: '作品说明', image: '/uploads/work.png' };
+  const work = { id: 'first', title: '第一个作品', url: 'https://example.com/project/', description: '作品说明', image: '/uploads/work.png' };
   const works = parseWorks({ items: [
     work,
     { id: 'second', title: '第二个作品', url: 'https://example.com/' },
@@ -64,8 +64,32 @@ test('CMS works keep configured order, accept optional uploaded covers and prior
   assert.deepEqual(parseWorks({ items: [] }), []);
 });
 
+test('works can be submitted with an icon, text and link without manual identifiers', () => {
+  const works = parseWorks({ items: [
+    { title: '上传的作品', icon: '/uploads/work-icon.png', url: 'https://example.com/project/', description: '作品说明' },
+    { title: '独立页面', icon: 'https://images.example.com/icon.png', url: '/projects/example/' },
+    { title: '暂无图标', icon: '', url: 'https://example.com/another/' },
+  ] });
+  assert.deepEqual(works.map(work => work.title), ['上传的作品', '独立页面', '暂无图标']);
+  assert.deepEqual(works.map(work => work.icon), ['/uploads/work-icon.png', 'https://images.example.com/icon.png', undefined]);
+  assert.equal(works[0].description, '作品说明');
+  assert.equal(works[1].url, '/projects/example/');
+  assert.equal(works[1].image, undefined);
+  assert.equal(works[2].description, undefined);
+  assert.equal(parseWorks({ items: [{ title: '无图标字段', url: '/' }] })[0].icon, undefined);
+  for (const field of ['title', 'url']) {
+    assert.throws(() => parseWorks({ items: [{ title: '作品', url: '/', [field]: '' }] }), new RegExp(`\\.${field}`));
+  }
+});
+
+test('uploaded work icons cannot escape uploads or use unsafe remote sources', () => {
+  for (const icon of ['/uploads/../private.png', '/uploads/%2e%2e/private.png', '/uploads/%5cprivate.png', '/uploads/icon.png?x=1', '/uploads/', '//example.com/icon.png', 'javascript:alert(1)', 'http://example.com/icon.png', 'https://user:password@example.com/icon.png']) {
+    assert.throws(() => parseWorks({ items: [{ title: '作品', url: 'https://example.com/', icon }] }), undefined, icon);
+  }
+});
+
 test('works reject duplicate identifiers, unsafe destinations and invalid cover paths', () => {
-  const work = { id: 'example', title: '作品', url: '/lab/' };
+  const work = { id: 'example', title: '作品', url: 'https://example.com/project/' };
   assert.throws(() => parseWorks({ items: [work, work] }), /Duplicate work id/);
   assert.throws(() => parseWorks({ items: [{ ...work, id: '../example' }] }), /\.id/);
   for (const url of ['//example.com/', '/%2fexample.com/', '/\\example.com/', 'javascript:alert(1)', 'http://example.com/', 'https://user:password@example.com/']) {

@@ -7,29 +7,17 @@ import { parse } from 'yaml';
 const root = resolve(import.meta.dirname, '..');
 const read = (file) => readFileSync(join(root, 'dist', file), 'utf8');
 
-test('old URLs retain no-JavaScript redirects and canonical destinations', () => {
-  for (const [file, target] of Object.entries({
-    'persona-2025.html': '/persona/2025/', 'sandbox-lab.html': '/lab/', 'home-redirect.html': '/',
-  })) {
-    const html = read(`pages/${file}`);
-    assert.ok(html.includes(`content="0; url=${target}"`));
-    assert.ok(html.includes(`href="https://kaisenn.net${target}"`));
-    assert.ok(html.includes(`id="destination" href="${target}"`));
-    assert.ok(existsSync(join(root, 'dist', target, 'index.html')));
+test('retired works and their legacy redirects are excluded from the published template', () => {
+  for (const file of [
+    'lab/index.html',
+    'persona/2025/index.html',
+    'pages/persona-2025.html',
+    'pages/sandbox-lab.html',
+    'pages/home-redirect.html',
+    'legacy-redirect.js',
+  ]) {
+    assert.ok(!existsSync(join(root, 'dist', file)), `${file} must stay outside the published template`);
   }
-});
-
-test('the retired annual recap retains an entry back to works and the garden retains its controls', () => {
-  const persona = read('persona/2025/index.html');
-  assert.doesNotMatch(persona, /终极共生|情绪双重奏|Trying to Feel Alive|ENFJ|Nurture|<img\b/);
-  assert.equal((persona.match(/<h1\b/g) ?? []).length, 1);
-  assert.match(persona, /href="\/works\/"/);
-  assert.match(persona, /noindex, follow/);
-  const garden = read('lab/index.html');
-  assert.match(garden, /<button[^>]+id="plot"/);
-  assert.match(garden, /id="hint"[^>]+role="status"/);
-  assert.match(garden, /aria-describedby="hint"/);
-  assert.match(garden, /<noscript>/);
 });
 
 test('folder galleries enhance real navigation to their complete archives', () => {
@@ -58,7 +46,7 @@ test('CMS stores the same fields used by the site with safe writing defaults', (
     ['profile', 'src/data/site.json', 'avatar'],
     ['photos', 'src/data/photos.json', 'src'],
     ['friends', 'src/data/friends.json', 'avatar'],
-    ['works', 'src/data/works.json', 'image'],
+    ['works', 'src/data/works.json', 'icon'],
   ]) {
     const entry = cms.content.find(entry => entry.name === name);
     assert.ok(entry, `${name} can be managed through CMS`);
@@ -70,6 +58,10 @@ test('CMS stores the same fields used by the site with safe writing defaults', (
   }
   const profileFields = cms.content.find(entry => entry.name === 'profile').fields;
   assert.equal(profileFields.find(field => field.name === 'favicon').options.media, 'uploads');
+  const workFields = cms.content.find(entry => entry.name === 'works').fields.find(field => field.name === 'items').fields;
+  for (const name of ['title', 'url']) assert.equal(workFields.find(field => field.name === name).required, true);
+  assert.ok(workFields.find(field => field.name === 'description'));
+  assert.ok(!workFields.some(field => ['id', 'image', 'imageUrl'].includes(field.name) && field.required), 'New work submissions must not require identifiers or a separate cover');
 });
 
 test('production CSS retains standard backdrop filters after vendor-prefix minification', () => {
@@ -100,11 +92,11 @@ test('all content destinations use the client router without fading the page can
   }
 });
 
-test('production output keeps the domain and omits legacy redirects and 404 from sitemap', () => {
+test('production output keeps the domain and omits retired pages and 404 from sitemap', () => {
   assert.equal(read('CNAME').trim(), 'kaisenn.net');
   const sitemap = readdirSync(join(root, 'dist')).filter((file) => /^sitemap-\d+\.xml$/.test(file)).map(read).join('');
   assert.match(sitemap, /https:\/\/kaisenn.net\/posts\//);
-  assert.doesNotMatch(sitemap, /\/pages\/|\/404|\/persona\/2025\//);
+  assert.doesNotMatch(sitemap, /\/pages\/|\/404|\/persona\/2025\/|\/lab\//);
   assert.match(read('robots.txt'), /https:\/\/kaisenn.net\/sitemap-index.xml/);
   assert.match(read('404.html'), /noindex, follow/);
 });

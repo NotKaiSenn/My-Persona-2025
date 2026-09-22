@@ -10,7 +10,6 @@ export default defineConfig({
     host: true,
   },
   integrations: [icon(), sitemap({
-    filter: (page) => !new URL(page).pathname.startsWith('/pages/')
-      && !['/404/', '/404.html', '/persona/2025/'].includes(new URL(page).pathname),
+    filter: (page) => !['/404/', '/404.html'].includes(new URL(page).pathname),
   })],
 });

@@ -4,9 +4,9 @@ import WorkVisual from './WorkVisual.astro';
 interface Props {
   title: string; href: string; kind: 'note' | 'photo' | 'friend'; index: number; total: number;
   paragraphs?: string[]; date?: Date; imageSrc?: string;
-  imageWidth?: number; imageHeight?: number; imageAlt?: string; description?: string; showTitle?: boolean;
+  imageWidth?: number; imageHeight?: number; imageAlt?: string; description?: string; showTitle?: boolean; iconSrc?: string;
 }
-const { title, href, kind, index, total, paragraphs = [], date, imageSrc, imageWidth, imageHeight, imageAlt = '', description, showTitle = false } = Astro.props;
+const { title, href, kind, index, total, paragraphs = [], date, imageSrc, imageWidth, imageHeight, imageAlt = '', description, showTitle = false, iconSrc } = Astro.props;
 const shapes = {
   note: [
     { width: 33, top: 3, ratio: 3 / 4.6 },
@@ -37,7 +37,7 @@ const noteColor = noteColors[noteColorIndex];
 <li class="folder-item" data-kind={kind === 'friend' ? 'photo' : kind} data-layout={kind} data-title={title} data-href={href} data-card-width={width} data-ratio={ratio} style={`--card-width:${width}%;--card-ratio:${ratio};--home-x:${offset * 6 / width * 100}%;--home-turn:${rotation}deg;--top:${top}%;z-index:${total - Math.round(Math.abs(offset))}`}>
   <div class="collection-frame">
     <a class="card-content" href={href} aria-label={title}>
-      {kind === 'photo' && showTitle ? <WorkVisual image={imageSrc} title={title} description={description} /> : kind === 'photo' ? <figure class="photo-print">
+      {kind === 'photo' && showTitle ? <WorkVisual image={imageSrc} icon={iconSrc} title={title} description={description} /> : kind === 'photo' ? <figure class="photo-print">
         <img src={imageSrc} alt={imageAlt} width={imageWidth} height={imageHeight} loading="lazy" decoding="async" />
       </figure> : kind === 'note' ? <article class="note-preview">
         <div class="excerpt-text">{paragraphs.map(paragraph => <p>{paragraph}</p>)}</div>
