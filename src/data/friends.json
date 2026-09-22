@@ -11,6 +11,11 @@
       "url": "https://inuebisu.cn",
       "description": "And miles to go before I sleep",
       "avatarUrl": "https://inuebisu.cn/avatar.png"
+    },
+    {
+      "name": "oines",
+      "url": "https://oines.dev/",
+      "avatarUrl": "https://oines.dev/avatar.webp"
     }
   ]
 }
