@@ -6,6 +6,8 @@
     "node": ">=24.0.0"
   },
   "scripts": {
+    "prepare": "node scripts/install-git-hooks.mjs",
+    "hooks:install": "node scripts/install-git-hooks.mjs",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

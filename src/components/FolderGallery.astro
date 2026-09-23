@@ -48,9 +48,9 @@ const { id, title, subtitle, href, emptyMessage = '暂无笔记', tiled = false 
   .stage-controls button { display: grid; place-items: center; width: 32px; height: 32px; border: none; padding: 0; background: none; color: inherit; cursor: pointer; }
   .stage-controls button[aria-disabled="true"] { opacity: .3; cursor: default; }
   [data-gallery-count] { min-width: 48px; color: var(--body); font-size: 13px; font-weight: 500; line-height: 1; font-variant-numeric: lining-nums tabular-nums; text-align: center; }
-  .stage-empty { position: absolute; top: 46%; width: 100%; padding: 0 30px; text-align: center; font-size: 14px; color: var(--muted); }
-  .folder-stage.is-closing .stage-bar, .folder-stage.is-closing .stage-footer { opacity: 0; pointer-events: none; }
+  .stage-empty { position: absolute; top: 46%; width: 100%; padding: 0 30px; text-align: center; font-size: 14px; color: var(--muted); transition: opacity 200ms ease; }
+  .folder-stage.is-closing .stage-bar, .folder-stage.is-closing .stage-footer, .folder-stage.is-closing .stage-empty { opacity: 0; pointer-events: none; }
   .stage-footer[hidden] { display: none; }
   @media (max-width: 540px) { .stage-bar { padding: 20px; } .stage-footer { inset-inline: 20px; bottom: 20px; } .stage-actions { gap: 18px; } .stage-views { gap: 14px; } .folder-stage.is-grid .stage-viewport { width: calc(100% - 32px); } }
-  @media (prefers-reduced-motion: reduce) { .folder-stage::backdrop { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .folder-stage::backdrop, .stage-empty { transition: none; } }
 </style>

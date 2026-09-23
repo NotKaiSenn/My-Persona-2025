@@ -15,6 +15,23 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  content-boundary:
+    name: CMS content boundary
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Check framework changes for CMS content
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: node scripts/check-content-boundary.mjs --base "$BASE_SHA" --head "$HEAD_SHA"
+
   build:
     runs-on: ubuntu-latest
     steps:
