@@ -61,6 +61,8 @@ test('CMS stores the same fields used by the site with safe writing defaults', (
   const workFields = cms.content.find(entry => entry.name === 'works').fields.find(field => field.name === 'items').fields;
   for (const name of ['title', 'url']) assert.equal(workFields.find(field => field.name === name).required, true);
   assert.ok(workFields.find(field => field.name === 'description'));
+  assert.equal(workFields.find(field => field.name === 'icon').label, '展示图片');
+  for (const name of ['width', 'height']) assert.notEqual(workFields.find(field => field.name === name).required, true);
   assert.ok(!workFields.some(field => ['id', 'image', 'imageUrl'].includes(field.name) && field.required), 'New work submissions must not require identifiers or a separate cover');
 });
 

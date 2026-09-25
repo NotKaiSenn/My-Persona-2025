@@ -1,0 +1,31 @@
+import { readFile } from 'node:fs/promises';
+import { resolve, relative, isAbsolute } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { imageMetadata } from 'astro/assets/utils';
+
+interface Dimensions { width: number; height: number; }
+
+export function localImageDimensions(publicDir: URL) {
+  const uploadsDir = resolve(fileURLToPath(publicDir), 'uploads');
+  const dimensions = new Map<string, Promise<Dimensions>>();
+
+  return async (src: string, kind: 'photo' | 'work'): Promise<Dimensions | undefined> => {
+    if (!src.startsWith('/uploads/')) return undefined;
+    const imagePath = resolve(uploadsDir, decodeURIComponent(src.slice('/uploads/'.length)));
+    const relativePath = relative(uploadsDir, imagePath);
+    if (!relativePath || relativePath.startsWith('..') || isAbsolute(relativePath)) {
+      throw new Error(`Local ${kind} must point to a file within /uploads/.`);
+    }
+    let metadata = dimensions.get(imagePath);
+    if (!metadata) {
+      metadata = readFile(imagePath).then(data => imageMetadata(data, src));
+      dimensions.set(imagePath, metadata);
+    }
+    try {
+      const { width, height } = await metadata;
+      return { width, height };
+    } catch (cause) {
+      throw new Error(`Unable to read local ${kind} ${src}.`, { cause });
+    }
+  };
+}

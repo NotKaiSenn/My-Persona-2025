@@ -37,12 +37,3 @@ export function displayDate(date: Date): string {
     year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
   }).format(date);
 }
-
-export function postPreview(post: Post): string[] {
-  const text = (post.body ?? '').replace(/```[\s\S]*?```/g, '').replace(/!\[[^\]]*\]\([^)]*\)/g, '');
-  return text.split(/\n\s*\n/)
-    .filter(block => block.trim() && !/^(?:#{1,6}\s|\||[-*+]\s|\d+\.\s)/.test(block.trim()))
-    .map(block => block.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/<[^>]*>/g, '')
-      .replace(/^[>\s]+/gm, '').replace(/[*_~`]/g, '').replace(/\s+/g, ' ').trim())
-    .filter(Boolean).slice(0, 3).map(paragraph => paragraph.length > 160 ? `${paragraph.slice(0,160)}…` : paragraph);
-}

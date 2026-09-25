@@ -5,9 +5,15 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { parse, stringify } from 'yaml';
-import { writeTinyPng } from '../helpers/image-fixture.mjs';
+import { htmlToHast } from 'satteri';
+import { writeTinyPng, writeTransparentPng } from '../helpers/image-fixture.mjs';
+import { galleryBrowser } from '../helpers/gallery-browser.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
+
+function elements(node, match) {
+  return [...(node.type === 'element' && match(node) ? [node] : []), ...(node.children ?? []).flatMap(child => elements(child, match))];
+}
 
 function assertNoContentScripts(html) {
   const withoutRouter = html.replace(/<script\b[^>]*src="\/_astro\/ClientRouter\.[^"]+\.js"[^>]*><\/script>/g, '');
@@ -34,7 +40,8 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
   writeTinyPng(join(fixture, 'public/uploads/photo.png'));
   writeTinyPng(join(fixture, 'public/uploads/avatar.png'));
   writeTinyPng(join(fixture, 'public/uploads/work.png'));
-  writeTinyPng(join(fixture, 'public/uploads/work-icon.png'));
+  writeTransparentPng(join(fixture, 'public/uploads/work-icon.png'));
+  writeTransparentPng(join(fixture, 'public/uploads/work-portrait.png'), 3, 12);
   const photosPath = join(fixture, 'src/data/photos.json');
   const fixturePhotos = [
     { id: 'photo-window', title: '测试照片：窗边', date: '2026-09-20', description: '本地照片的测试说明。', src: '/uploads/photo.png', alt: '测试上传的图片' },
@@ -53,8 +60,9 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
   const fixtureWorks = Array.from({ length: 8 }, (_, index) => ({
     title: `作品 ${index + 1}`, url: `https://example.com/work-${index + 1}/`, description: `作品说明 ${index + 1}`,
     ...(index > 0 ? { id: `work-${index + 1}` } : { icon: '/uploads/work-icon.png' }),
-    ...(index !== 0 && index !== 2 ? { image: '/uploads/work.png' } : {}),
+    ...(index !== 0 && index !== 2 ? { image: '/uploads/work.png', icon: '/uploads/work-icon.png' } : {}),
     ...(index === 1 ? { imageUrl: 'https://images.example.com/work.webp' } : {}),
+    ...(index === 5 ? { image: '/uploads/work-portrait.png' } : {}),
   }));
   writeFileSync(worksPath, JSON.stringify({ items: fixtureWorks }));
   const profilePath = join(fixture, 'src/data/site.json');
@@ -113,6 +121,7 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
 
   await t.test('all folders cap previews at 6 while preserving order, totals and complete archives', () => {
     const home = read('index.html');
+    const tree = htmlToHast(home);
     const expected = {
       posts: { total: 15, unit: '篇', hrefs: ['same-day', '中文文章', 'note-13', 'note-12', 'note-11', 'note-10'].map(id => `/posts/${encodeURIComponent(id)}/`) },
       works: { total: 8, unit: '项', hrefs: fixtureWorks.slice(0, 6).map(work => work.url) },
@@ -120,9 +129,9 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
       friends: { total: 8, unit: '位', hrefs: fixtureFriends.slice(0, 6).map(friend => friend.url) },
     };
     for (const [category, { total, unit, hrefs }] of Object.entries(expected)) {
-      const folder = home.match(new RegExp(`data-folder="${category}"[\\s\\S]*?<ul\\b[^>]*>([\\s\\S]*?)<\\/ul>`));
+      const folder = elements(tree, node => node.properties.dataFolder === category)[0];
       assert.ok(folder, `${category} folder is rendered`);
-      assert.deepEqual([...folder[1].matchAll(/data-href="([^"]+)"/g)].map(([, href]) => href), hrefs);
+      assert.deepEqual(elements(folder, node => node.tagName === 'li' && node.properties.dataHref).map(node => node.properties.dataHref), hrefs);
       assert.match(home, new RegExp(`aria-label="[^"]+，${total} ${unit}"`));
       const dialog = home.match(new RegExp(`<dialog id="${category}-gallery"[\\s\\S]*?<\\/dialog>`))?.[0];
       assert.ok(dialog, `${category} gallery is rendered`);
@@ -132,6 +141,57 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
     assert.equal((read('photos/index.html').match(/class="photo-entry"/g) ?? []).length, 8);
     assert.equal((read('friends/index.html').match(/class="friend-card"/g) ?? []).length, 8);
     for (const photo of fixturePhotos) assert.ok(existsSync(join(fixture, 'dist/photos', photo.id, 'index.html')));
+  });
+
+  await t.test('portrait artwork keeps its original ratio within the folder when resting, fanned and selected', () => {
+    const tree = htmlToHast(read('index.html'));
+    const folder = elements(tree, node => node.properties.dataFolder === 'works')[0];
+    const entries = elements(folder, node => node.tagName === 'li' && node.properties.dataHref);
+    const browser = galleryBrowser({ count: entries.length, reducedMotion: true });
+    browser.leavePage();
+    const wrap = browser.home.parentNode;
+    wrap.offsetWidth = wrap.clientWidth = 306;
+    wrap.offsetHeight = 260.1;
+    entries.forEach((entry, index) => {
+      const card = browser.cards[index];
+      card.dataset.layout = 'photo';
+      card.dataset.kind = 'photo';
+      card.dataset.cardWidth = String(entry.properties.dataCardWidth);
+      card.style.cssText = String(entry.properties.style);
+      card.offsetWidth = wrap.clientWidth * Number(entry.properties.dataCardWidth) / 100;
+      card.offsetHeight = card.offsetWidth / Number(entry.properties.dataRatio);
+      card.offsetTop = wrap.offsetHeight * parseFloat(card.style.getPropertyValue('--top')) / 100;
+    });
+    browser.returnToPage();
+    const portrait = browser.cards.at(-1);
+    assert.equal(Number(entries.at(-1).properties.dataRatio), 1 / 4, 'Layout retains the uploaded 3×12 image ratio');
+    assert.ok(portrait.offsetHeight <= wrap.offsetHeight * .78, 'The whole portrait fits into the preview instead of extending below its folder');
+
+    function verticalBounds(card) {
+      const transform = card.style.transform.match(/^translate\([^,]+,([^p]+)px\) rotate\(([^d]+)deg\) scale\(([^)]+)\)$/);
+      assert.ok(transform, 'The real gallery script supplies the card pose');
+      const [, y, degrees, scale] = transform.map(Number);
+      const radians = degrees * Math.PI / 180;
+      const halfHeight = (card.offsetWidth * Math.abs(Math.sin(radians)) + card.offsetHeight * Math.abs(Math.cos(radians))) * scale / 2;
+      const center = card.offsetTop + card.offsetHeight / 2 + y;
+      return { top: center - halfHeight, bottom: center + halfHeight, scale };
+    }
+    function assertInside(phase) {
+      for (const card of browser.cards) {
+        const bounds = verticalBounds(card);
+        assert.ok(bounds.top >= 0 && bounds.bottom <= wrap.offsetHeight, `${phase}: artwork stays within both vertical folder edges`);
+      }
+    }
+    browser.opener.emit('pointerleave');
+    assertInside('resting');
+    browser.opener.emit('pointerenter');
+    assertInside('fanned');
+    browser.opener.emit('pointermove', { clientX: 326, clientY: 130 });
+    assert.ok(verticalBounds(portrait).scale > 1, 'The portrait is enlarged by actual hover selection');
+    assertInside('selected');
+    browser.opener.emit('pointerleave');
+    assertInside('restored');
+    browser.leavePage();
   });
 
   await t.test('drafts are absent from every public listing, feed, sitemap and route', () => {
@@ -186,19 +246,27 @@ test('CMS-shaped Markdown builds stable, paginated, draft-safe static pages', as
     for (const work of fixtureWorks) assert.ok(works.includes(`href="${work.url}"`), `${work.title} links to its configured destination`);
     assert.match(works, /src="\/uploads\/work.png"/);
     assert.match(works, /src="https:\/\/images.example.com\/work.webp"/);
-    assert.match(works, /作品说明 1/);
+    assert.doesNotMatch(works, /作品说明 \d/);
+    assert.deepEqual(readFileSync(join(fixture, 'dist/uploads/work-icon.png')), readFileSync(join(fixture, 'public/uploads/work-icon.png')), 'The transparent uploaded PNG is published unchanged');
     for (const html of [home, works]) {
       const iconWork = html.match(/<a\b[^>]*href="https:\/\/example.com\/work-1\/"[^>]*aria-label="作品 1"[\s\S]*?<\/a>/)?.[0];
-      assert.ok(iconWork, 'An icon, text and link submission renders without a manual identifier');
+      assert.ok(iconWork, 'The work link retains its accessible name without visible text');
       const icon = iconWork.match(/<img\b[^>]*src="\/uploads\/work-icon.png"[^>]*>/)?.[0];
-      assert.ok(icon, 'The uploaded icon appears in both the folder and complete works list');
-      assert.match(icon, /class="work-icon(?:\s[^"]*)?"/);
-      assert.match(iconWork, /作品说明 1/);
+      assert.ok(icon, 'The uploaded image appears in both the folder and complete works list');
+      assert.match(icon, /width="12"[^>]*height="7"/);
+      assert.equal((iconWork.match(/<img\b/g) ?? []).length, 1);
+      assert.doesNotMatch(iconWork, /<h[1-6]\b|<p\b|class="work-(?:overlay|icon|cover)(?:\s|")|作品说明 1/);
       assert.doesNotMatch(iconWork, /src="\/uploads\/work.png"/);
+      const coverWork = html.match(/<a\b[^>]*href="https:\/\/example.com\/work-2\/"[^>]*aria-label="作品 2"[\s\S]*?<\/a>/)?.[0];
+      assert.ok(coverWork);
+      assert.match(coverWork, /src="https:\/\/images.example.com\/work.webp"/);
+      assert.equal((coverWork.match(/<img\b/g) ?? []).length, 1, 'A legacy cover replaces the icon instead of overlaying it');
+      assert.doesNotMatch(coverWork, /src="\/uploads\/work-icon.png"|src="\/uploads\/work.png"/);
     }
     const imagelessWork = works.match(/<a\b[^>]*aria-label="作品 3"[\s\S]*?<\/a>/)?.[0];
     assert.ok(imagelessWork, 'A work can be published before a cover is uploaded');
     assert.doesNotMatch(imagelessWork, /<img\b/);
+    assert.match(imagelessWork, /<svg\b/);
     for (const html of [photo, external, photoList, friends, works]) assertNoContentScripts(html);
     assert.match(read('sitemap-0.xml'), /https:\/\/kaisenn.net\/photos\/photo-window\//);
   });

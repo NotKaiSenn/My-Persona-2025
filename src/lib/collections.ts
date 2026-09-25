@@ -26,6 +26,8 @@ export interface Work {
   description?: string;
   icon?: string;
   image?: string;
+  width: number;
+  height: number;
 }
 
 function record(value: unknown, label: string): Record<string, unknown> {
@@ -150,6 +152,8 @@ export function parseWorks(value: unknown): Work[] {
       description: optionalText(work.description, `${label}.description`),
       icon: icon ? imageSource(icon, `${label}.icon`) : undefined,
       image: imageUrl ? httpsUrl(imageUrl, `${label}.imageUrl`) : image ? imageSource(image, `${label}.image`) : undefined,
+      width: dimension(work.width, `${label}.width`, 1),
+      height: dimension(work.height, `${label}.height`, 1),
     };
   });
 }
