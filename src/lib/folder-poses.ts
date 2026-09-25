@@ -6,8 +6,9 @@ export function stagePoses(cards: CardSize[], active: number, width: number, hei
   const mobile = width <= 540;
   const unit = Math.min(width * (mobile ? .76 : .46), height * .52);
   const readingHeight = Math.min(height * .82, height - (mobile ? 174 : 150));
+  const readingWidth = mobile ? width - 56 : Math.min(width * .6, 480);
   const fit = (card: CardSize, index: number) => index === active && card.kind === 'note'
-    ? Math.min((mobile ? width - 56 : width * .6) / card.width, readingHeight / card.height)
+    ? Math.min(readingWidth / card.width, readingHeight / card.height)
     : unit / Math.max(card.width, card.height) * (index === active ? 1 : .6);
   const reach = fit(cards[active], active) * cards[active].width / 2 + unit * .08 + unit * .6 / 2;
   return cards.map((card, index) => {

@@ -1,19 +1,15 @@
 ---
 import { Icon } from 'astro-icon/components';
 import WorkVisual from './WorkVisual.astro';
+import { displayDate } from '../lib/post-data';
 interface Props {
   title: string; href: string; kind: 'note' | 'photo' | 'friend'; index: number; total: number;
-  paragraphs?: string[]; date?: Date; imageSrc?: string;
-  imageWidth?: number; imageHeight?: number; imageAlt?: string; description?: string; showTitle?: boolean; iconSrc?: string;
+  preview?: { html: string; width: number; top: number; ratio: number }; date?: Date; imageSrc?: string;
+  imageWidth?: number; imageHeight?: number; imageAlt?: string; description?: string; artwork?: boolean; iconSrc?: string;
 }
-const { title, href, kind, index, total, paragraphs = [], date, imageSrc, imageWidth, imageHeight, imageAlt = '', description, showTitle = false, iconSrc } = Astro.props;
-const shapes = {
-  note: [
-    { width: 33, top: 3, ratio: 3 / 4.6 },
-    { width: 36, top: 10, ratio: 3 / 3.8 },
-    { width: 32, top: 1, ratio: 3 / 5 },
-    { width: 35, top: 12, ratio: 3 / 4.2 },
-  ],
+const { title, href, kind, index, total, preview, date, imageSrc, imageWidth, imageHeight, imageAlt = '', description, artwork = false, iconSrc } = Astro.props;
+const shapes: Record<Props['kind'], Array<{ width: number; top: number; ratio?: number }>> = {
+  note: [{ width: 33, top: 3, ratio: 3 / 4.6 }],
   photo: [
     { width: 34, top: 5 }, { width: 44, top: 9 }, { width: 37, top: 4 },
     { width: 42, top: 10 }, { width: 32, top: 6 },
@@ -23,25 +19,25 @@ const shapes = {
     { width: 34, top: 4 }, { width: 38, top: 12 },
   ],
 };
-const shape = shapes[kind][index % shapes[kind].length];
-const width = shape.width;
+const shape = kind === 'note' && preview ? preview : shapes[kind][index % shapes[kind].length];
 const imageRatio = (imageWidth ?? 4) / (imageHeight ?? 3);
-const ratio = 'ratio' in shape ? shape.ratio : kind === 'friend' ? 1.35 : showTitle ? imageRatio : 1 / (.94 / imageRatio + .06);
-const top = kind === 'photo' ? Math.max(shape.top, 40 - width / ratio * 20 / 17) : shape.top;
+const ratio = shape.ratio ?? (kind === 'friend' ? 1.35 : artwork ? imageRatio : 1 / (.94 / imageRatio + .06));
+// Leave room for the selected artwork's upward travel and 1.05 scale without cropping it.
+const width = artwork ? Math.min(shape.width, 70 * 17 / 20 * ratio) : shape.width;
+const heightPercent = width / ratio * 20 / 17;
+const restingTop = kind === 'photo' ? Math.max(shape.top, 40 - heightPercent) : shape.top;
+const top = artwork ? Math.max(restingTop, heightPercent * .365 + 1) : restingTop;
 const offset = index - (total - 1) / 2;
 const rotation = offset * (6 / Math.max(total - 1, 1));
-const noteColors = ['#D5836D', '#7DA181', '#DAB55B', '#608EC9'];
-const noteColorIndex = Array.from(href).reduce((hash, character) => (Math.imul(hash, 31) + character.codePointAt(0)!) >>> 0, 0) % noteColors.length;
-const noteColor = noteColors[noteColorIndex];
 ---
-<li class="folder-item" data-kind={kind === 'friend' ? 'photo' : kind} data-layout={kind} data-title={title} data-href={href} data-card-width={width} data-ratio={ratio} style={`--card-width:${width}%;--card-ratio:${ratio};--home-x:${offset * 6 / width * 100}%;--home-turn:${rotation}deg;--top:${top}%;z-index:${total - Math.round(Math.abs(offset))}`}>
+<li class:list={['folder-item', { 'is-artwork': artwork }]} data-kind={kind === 'friend' ? 'photo' : kind} data-layout={kind} data-title={title} data-href={href} data-card-width={width} data-ratio={ratio} style={`--card-width:${width}%;--card-ratio:${ratio};--home-x:${offset * 6 / width * 100}%;--home-turn:${rotation}deg;--top:${top}%;z-index:${total - Math.round(Math.abs(offset))}`}>
   <div class="collection-frame">
     <a class="card-content" href={href} aria-label={title}>
-      {kind === 'photo' && showTitle ? <WorkVisual image={imageSrc} icon={iconSrc} title={title} description={description} /> : kind === 'photo' ? <figure class="photo-print">
+      {kind === 'photo' && artwork ? <WorkVisual image={imageSrc} icon={iconSrc} title={title} width={imageWidth} height={imageHeight} /> : kind === 'photo' ? <figure class="photo-print">
         <img src={imageSrc} alt={imageAlt} width={imageWidth} height={imageHeight} loading="lazy" decoding="async" />
       </figure> : kind === 'note' ? <article class="note-preview">
-        <div class="excerpt-text">{paragraphs.map(paragraph => <p>{paragraph}</p>)}</div>
-        <header class="note-caption" style={`--note-color:${noteColor}`}><h3>{title}</h3>{date && <time datetime={date.toISOString()}>{date.toISOString().slice(0,10).replaceAll('-',' / ')}</time>}</header>
+        <header class="note-heading"><h3>{title}</h3>{date && <time datetime={date.toISOString().slice(0,10)}>{displayDate(date)}</time>}</header>
+        <div class="excerpt-text" set:html={preview?.html ?? ''} />
       </article> : <article class="friend-preview">
         {imageSrc ? <img class="friend-avatar" src={imageSrc} alt="" width="64" height="64" loading="lazy" /> : <span class="friend-initial" aria-hidden="true">{title.slice(0,1)}</span>}
         <h3>{title}</h3>{description && <p>{description}</p>}<span class="friend-address"><span>{new URL(href).hostname}</span><Icon is:inline aria-hidden="true" focusable="false" name="ph:arrow-up-right" /></span>
@@ -58,14 +54,33 @@ const noteColor = noteColors[noteColorIndex];
   .photo-print, .note-preview, .friend-preview { width: 100%; height: 100%; margin: 0; border-radius: var(--radius); overflow: hidden; }
   .photo-print { padding: 3cqw; background: white; }
   .photo-print img { width: 100%; height: 100%; object-fit: contain; border-radius: calc(var(--radius) - 3cqw); }
-  .folder-item[data-kind="note"] .card-content { overflow: visible; box-shadow: none; }
-  .note-preview { position: relative; display: grid; grid-template-rows: minmax(0,1fr) auto 15%; padding: 0; overflow: visible; border-radius: 0; background: none; }
-  .note-preview::before { content: ''; position: absolute; inset: 0 0 0 8%; border-radius: var(--radius); background: #fffefa; box-shadow: 0 0 0 1px #323b2f08,0 2px 4px #2932280c,0 8px 16px #29322816; }
-  .excerpt-text { position: relative; grid-row: 1; min-height: 0; margin-left: 8%; padding: 6cqw 6cqw 4cqw; font-size: 4.1cqw; line-height: 1.9; color: #62665a; overflow: hidden; overflow-wrap: anywhere; }
-  .excerpt-text p + p { margin-top: 4cqw; }
-  .note-caption { position: relative; grid-row: 2; margin-right: 12%; padding: 6cqw 4cqw; border-radius: 0 2cqw 2cqw 0; background: var(--note-color); color: #20251f; box-shadow: var(--surface-edge-shadow); }
-  .note-caption time { display: block; margin-top: 4cqw; font: 3cqw/1.4 ui-monospace,monospace; letter-spacing: .04em; }
-  .note-caption h3 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; font-size: 6.3cqw; font-weight: 550; line-height: 1.45; letter-spacing: -.015em; overflow-wrap: anywhere; }
+  .folder-item.is-artwork .card-content { overflow: visible; border-radius: 0; box-shadow: none; }
+  .note-preview { display: grid; grid-template-rows: auto minmax(0,1fr); gap: 5cqw; padding: 8cqw; background: #fffefa; }
+  .note-heading h3 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; font-size: 7.5cqw; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; overflow-wrap: anywhere; }
+  .note-heading time { display: block; margin-top: 3cqw; color: var(--muted); font-size: 3cqw; line-height: 1.5; }
+  .excerpt-text { min-height: 0; overflow: hidden; overflow-wrap: anywhere; color: var(--body); font-size: 4.2cqw; line-height: 1.7; mask-image: linear-gradient(#000 0 94%,transparent); }
+  .excerpt-text :where(p,h1,h2,h3,h4,h5,h6,ul,ol,blockquote,pre,table,hr) { margin: 0; }
+  .excerpt-text > * + * { margin-top: 1em; }
+  .excerpt-text :is(h1,h2,h3,h4,h5,h6) { margin-top: 1.3em; color: var(--ink); font-size: 1.15em; line-height: 1.4; font-weight: 650; }
+  .excerpt-text > :first-child { margin-top: 0; }
+  .excerpt-text strong { color: var(--ink); font-weight: 650; }
+  .excerpt-text ul, .excerpt-text ol { padding-left: 1.4em; }
+  .excerpt-text li + li { margin-top: .3em; }
+  .excerpt-text li > :is(ul,ol,p + p) { margin-top: .3em; }
+  .excerpt-text blockquote { padding-left: .8em; border-left: .15em solid #b4c2a8; color: var(--muted); }
+  .excerpt-text blockquote > * + * { margin-top: .6em; }
+  .excerpt-text .preview-link { color: var(--green); text-decoration: underline; text-underline-offset: .2em; }
+  .excerpt-text code { font-family: ui-monospace,SFMono-Regular,Consolas,monospace; font-size: .85em; }
+  .excerpt-text :not(pre) > code { padding: .12em .25em; border-radius: .2em; background: #edf0e8; }
+  .excerpt-text pre { padding: .75em; border-radius: .4em; background: #24292e; color: #e1e4e8; overflow: hidden; line-height: 1.5; }
+  .excerpt-text img { max-width: 100%; max-height: 36cqw; margin: .5em auto; object-fit: contain; border-radius: 2cqw; }
+  .excerpt-text table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: .85em; }
+  .excerpt-text th, .excerpt-text td { padding: .3em .45em; border: 1px solid var(--line); text-align: left; }
+  .excerpt-text th { background: #eef1ea; }
+  .excerpt-text hr { border: 0; border-top: 1px solid var(--line); }
+  .excerpt-text .task-list-item { list-style: none; }
+  .preview-task { display: inline-block; width: .8em; height: .8em; margin-left: -1.15em; margin-right: .35em; border: .08em solid #a5b29b; border-radius: .15em; }
+  .preview-task.is-checked { background: var(--green); box-shadow: inset 0 0 0 .13em #fffefa; }
   .friend-preview { padding: 9cqw; background: #fffefa; }
   .friend-avatar,.friend-initial { display: grid; place-items: center; width: 17cqw; height: 17cqw; border-radius: 50%; background: #e7ecdf; font-size: 8cqw; object-fit: cover; }
   .friend-preview h3 { margin-top: 5cqw; font-size: 7cqw; line-height: 1.4; overflow-wrap: anywhere; }

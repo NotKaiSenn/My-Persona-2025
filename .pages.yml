@@ -124,15 +124,16 @@ content:
             summary: "{title}"
         fields:
           - name: icon
-            label: 图标
+            label: 展示图片
             type: image
             options:
               media: uploads
-            description: 上传 PNG、WebP 或 JPG，建议使用方形图片；留空时显示默认图标。
+            description: 完整显示图片本身，不叠加标题或图标；支持透明 PNG。留空时显示通用占位。
           - name: title
             label: 名称
             type: string
             required: true
+            description: 用于后台识别和链接的无障碍名称，不叠加在图片上。
           - name: url
             label: 访问地址
             type: string
@@ -141,6 +142,15 @@ content:
           - name: description
             label: 简介
             type: text
+            description: 保留的备注，不在作品图片上显示。
+          - name: width
+            label: 图片宽度
+            type: number
+            description: 上传图片会自动读取；外链图片可填写原图宽度（像素）。
+          - name: height
+            label: 图片高度
+            type: number
+            description: 上传图片会自动读取；外链图片可填写原图高度（像素）。
   - name: photos
     label: 照片
     type: file

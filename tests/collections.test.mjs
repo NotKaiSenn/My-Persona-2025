@@ -64,6 +64,16 @@ test('CMS works keep configured order, accept optional uploaded covers and prior
   assert.deepEqual(parseWorks({ items: [] }), []);
 });
 
+test('work dimensions accept external image sizes and otherwise use a square fallback', () => {
+  const work = { title: '作品', url: '/', icon: 'https://images.example.com/work.png' };
+  const parsed = parseWorks({ items: [work, { ...work, width: 900, height: 1600 }] });
+  assert.deepEqual(parsed.map(({ width, height }) => [width, height]), [[1, 1], [900, 1600]]);
+  for (const invalid of [0, -1, 2.5, '900']) {
+    assert.throws(() => parseWorks({ items: [{ ...work, width: invalid }] }), /dimension/);
+    assert.throws(() => parseWorks({ items: [{ ...work, height: invalid }] }), /dimension/);
+  }
+});
+
 test('works can be submitted with an icon, text and link without manual identifiers', () => {
   const works = parseWorks({ items: [
     { title: '上传的作品', icon: '/uploads/work-icon.png', url: 'https://example.com/project/', description: '作品说明' },
